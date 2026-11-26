@@ -59,7 +59,8 @@ def image_check(raw,kind):
         im.verify()
 
 
-def extract(path, *, paddle_config=None, use_pymupdf=False):
+def extract(path, *, paddle_config=None, use_pymupdf=False, tesseract_psm=6, enhance_image=False):
+    if tesseract_psm not in (4,6,11) or type(enhance_image) is not bool:raise ValueError('Invalid OCR variant')
     raw,kind=load_source(path)
     if kind in ("png","jpg"):image_check(raw,kind)
     if kind=="pdf":
@@ -119,8 +120,16 @@ def extract(path, *, paddle_config=None, use_pymupdf=False):
         if not binary:raise ValueError("Install local Tesseract OCR")
         with tempfile.TemporaryDirectory() as root:
             local=Path(root)/("document."+kind)
-            local.write_bytes(raw)
-            proc=subprocess.run([binary,str(local),"stdout","-l","spa+eng","--psm","6","tsv"],
+            if enhance_image:
+                from PIL import Image,ImageOps
+                with Image.open(io.BytesIO(raw)) as im:
+                    enhanced=ImageOps.autocontrast(im.convert("L"))
+                    if enhanced.width*enhanced.height*4<=MAX_PIXELS:
+                        enhanced=enhanced.resize((enhanced.width*2,enhanced.height*2),Image.Resampling.LANCZOS)
+                    local=Path(root)/"enhanced.png";enhanced.save(local)
+            else:
+                local.write_bytes(raw)
+            proc=subprocess.run([binary,str(local),"stdout","-l","spa+eng","--psm",str(tesseract_psm),"tsv"],
                  capture_output=True,timeout=30,check=False)
             if proc.returncode or len(proc.stdout)>2_000_000:raise ValueError("OCR failed or exceeded limit")
             words=[]

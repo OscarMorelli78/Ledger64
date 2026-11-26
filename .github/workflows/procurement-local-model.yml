@@ -48,7 +48,7 @@ jobs:
             sleep 2
           done
           docker exec ledger64-offline ollama list
-          docker run --rm --network container:ledger64-offline --cap-drop ALL --security-opt no-new-privileges --read-only --tmpfs /tmp:rw,noexec,nosuid,size=64m --user "$(id -u):$(id -g)" -e PYTHONDONTWRITEBYTECODE=1 --mount "type=bind,source=$GITHUB_WORKSPACE,target=/src,readonly" --mount "type=bind,source=$RUNNER_TEMP/ledger64-model-report,target=/report" -w /src python:3.13-slim python scripts/benchmark_procurement_fields.py --backend text --model "$MODEL" --output /report/semantic-fields.json --gate
+          docker run --rm --network container:ledger64-offline --cap-drop ALL --security-opt no-new-privileges --read-only --tmpfs /tmp:rw,noexec,nosuid,size=64m --user "$(id -u):$(id -g)" -e PYTHONDONTWRITEBYTECODE=1 --mount "type=bind,source=$GITHUB_WORKSPACE,target=/src,readonly" --mount "type=bind,source=$RUNNER_TEMP/ledger64-model-report,target=/report" -w /src python:3.13-slim python scripts/benchmark_procurement_fields.py --backend text --model "$MODEL" --semantic-v2 --output /report/semantic-fields.json --gate
       - name: Preserve report even on accuracy gate failure
         if: always()
         uses: actions/upload-artifact@v6

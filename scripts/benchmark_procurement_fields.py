@@ -17,6 +17,8 @@ import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from procurement import validate
 from procurement_ingest import extract,propose
+from procurement_consensus import compare_image
+from procurement_semantic_v2 import propose_v2
 
 HEAD=("kind","id","supplier","date","currency")
 COMMON=("id","sku","unit","quantity")
@@ -119,8 +121,8 @@ def aggregate(rows):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--backend",choices=("text","tesseract","paddle"),required=True)
-    p.add_argument("--config",type=Path);p.add_argument("--model")
+    p.add_argument("--backend",choices=("text","tesseract","paddle","consensus"),required=True)
+    p.add_argument("--config",type=Path);p.add_argument("--model");p.add_argument("--semantic-v2",action="store_true")
     p.add_argument("--output",type=Path);p.add_argument("--gate",action="store_true")
     args=p.parse_args()
     if args.backend=="paddle" and not args.config:p.error("Paddle requires provisioned local configuration")
@@ -134,11 +136,14 @@ def main():
                     path=Path(root)/(name+".csv");path.write_text(text,encoding="utf-8")
                 else:
                     path=Path(root)/(name+".png");image_fixture(path,text,variant)
-                result=extract(path,paddle_config=args.config if args.backend=="paddle" else None)
-                if args.model:
-                    candidate=propose(result,args.model)["candidate"]
+                if args.backend=="consensus":
+                    candidate=compare_image(path)["candidate"]
                 else:
-                    candidate=strict_candidate("\n".join(x["text"] for x in result["pages"]))
+                    result=extract(path,paddle_config=args.config if args.backend=="paddle" else None)
+                    if args.model:
+                        candidate=(propose_v2 if args.semantic_v2 else propose)(result,args.model)["candidate"]
+                    else:
+                        candidate=strict_candidate("\n".join(x["text"] for x in result["pages"]))
             except (ValueError,TypeError,KeyError,OSError,RuntimeError) as exc:
                 error=type(exc).__name__
             rows.append({"case":name,"elapsed_seconds":round(time.perf_counter()-start,3),"error":error,**evaluate(gold,candidate)})

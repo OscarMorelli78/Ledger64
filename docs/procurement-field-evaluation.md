@@ -38,3 +38,14 @@ separate report directory are used. The quality gate is not bypassed if the mode
 fails. The experiment evaluates semantic extraction from text, not PaddleOCR or
 real invoices, and does not approve any financial record. Model selection remains
 conditional on measured results and licensing review.
+
+## Second experiment
+
+Qwen2.5 1.5B v1 returned no candidate on all eleven documents (run 45880052343).
+The v2 adapter uses a flat evidence-per-field schema and explicitly describes the
+labelled layout; it remains a separate experiment, not a default model. The same
+acceptance gate applies. The consensus baseline compares three local OCR passes;
+conflicting valid candidates always abstain rather than voting. Only the known
+labelled layout is supported. Agreement is not proof of correctness. A separate
+PP-StructureV3 workflow measures twelve table cells per synthetic image under
+network-disabled inference, with the original versions and dependencies recorded.
