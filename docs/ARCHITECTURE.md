@@ -1,3 +1,7 @@
 # Arquitectura
 
 `secure_app.py` es la entrada de servicio prevista. `tenant.py` gestiona autenticación y almacenamiento por empresa. `engine.py`, `ingest.py`, `flexible.py` e `independent.py` importan y contrastan datos. `governance.py`, `decisions.py` e `intelligence.py` controlan evidencias, aprobación y ROI. `reporting.py` exporta informes; `ocr_review.py` procesa OCR sujeto a revisión. HTML, CSS y JS existentes conforman la interfaz C64. `admin.py` es exclusivo del operador. `app.py` permanece como legado para regresiones, no para despliegue. Las nuevas integraciones no deben ampliar permisos por defecto ni alterar el núcleo.
+
+## Extensión experimental de compras
+
+`procurement_ingest.py`, `procurement_geometry.py`, `procurement_consensus.py` y `procurement_table.py` extraen borradores locales, no autorizaciones; `procurement_references.py` contrasta pedidos. `procurement.py` concilia líneas y conserva versiones; `procurement_history.py` reconstruye señales históricas. `procurement_templates.py` y `procurement_table_templates.py` guardan estructuras revisadas; `procurement_queue.py` y `procurement_lifecycle.py` separan propuesta y revisión independiente. `procurement_routes.py` habilita /procurement solo mediante BC_PROCUREMENT_PILOT=1. `procurement_backup.py` copia y recupera una base separada por empresa con verificación de integridad; no sustituye la recuperación integral. `engine.py` conserva su hash original. Modelos Qwen no aceptados; Paddle opcional. No ejecución de pagos.
