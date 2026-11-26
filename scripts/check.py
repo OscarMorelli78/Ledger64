@@ -8,5 +8,5 @@ subprocess.run([sys.executable,'-m','unittest','-v','test_i18n','adaptive_learni
 subprocess.run([sys.executable,'scripts/check_http_locales.py'],cwd=root,check=True)
 print('PASS: nine locales, diagnostics, PDF and offline learner checks')
 
-subprocess.run([sys.executable,'-m','unittest','-v','test_procurement','test_procurement_extensions'],cwd=root,check=True)
+subprocess.run([sys.executable,'-m','unittest','-v','test_procurement','test_procurement_extensions','test_procurement_http','test_procurement_ocr'],cwd=root,check=True)
 print('PASS: procurement pilot checks')

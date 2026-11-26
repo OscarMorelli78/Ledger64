@@ -55,7 +55,7 @@ reviews and corrects candidate JSON against the original before importing:
 The local pilot stores original bytes, hashes, document identity and reviewer
 evidence. It does not authenticate CLI names; trusted offline use only.
 No real/synthetic mixing. Existing web approvals, tenant isolation and templates
-are untouched. No Web integration in this increment. Existing supplier CSV
+are untouched. An opt-in authenticated web pilot is available. Existing supplier CSV
 templates remain available via intelligence.py; learning new arbitrary PDF
 layouts automatically is not implemented. Reference mapping is explicit.
 
@@ -80,4 +80,16 @@ Tests cover synthetic partial and multiple delivery/invoice matching, discount,
 tolerance, scope, isolation, source tampering, CLI demo, historical ALE,
 basic PDF/XLSX extraction and mock semantic proposals. Real OCR model accuracy,
 latency, RAM, extraction field F1, real invoices, production security and
-browser integration are explicit open gates. No 100% operational claim.
+full browser acceptance are explicit open gates. No 100% operational claim.
+
+## Authenticated web pilot (synthetic only)
+
+Set BC_PROCUREMENT_PILOT=1 before starting secure_app, sign in with the normal
+Ledger64 accounts and navigate to /procurement. The analyst submits a normalized
+candidate and original source; an independent owner downloads and reviews it.
+The report supports reader access. Existing main UI is unchanged. The feature
+is disabled by default. Local Tesseract fallback handles scanned PDF/JPG/PNG;
+advanced Paddle and Ollama use optional trusted server configuration. The pilot
+database is separate; existing backup/restore does not include it. Production
+backup, retention, revocation of approved documents, model benchmark and a
+complete browser/UX evaluation remain mandatory before real-data release.

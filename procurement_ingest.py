@@ -8,6 +8,9 @@ until deployment-specific isolation and licensing have been verified.
 from __future__ import annotations
 
 import io
+import shutil
+import subprocess
+import csv
 import json
 import re
 import tempfile
@@ -105,6 +108,33 @@ def extract(path, *, paddle_config=None, use_pymupdf=False):
                     if isinstance(html,str):
                         if len(html)>MAX_TEXT:raise ValueError("Oversized table")
                         tables.append({"page":len(pages),"html_untrusted":html})
+    if paddle_config is None and kind=="pdf" and any(not p.strip() for p in pages):
+        # Existing local OCR is deliberately only a transcription, never an approved invoice.
+        from ocr_review import transcribe
+        result=transcribe(raw,"spa+eng")
+        pages=[p["text"] for p in result["pages"]]
+        method="Tesseract"
+    elif paddle_config is None and kind in ("png","jpg"):
+        binary=shutil.which("tesseract")
+        if not binary:raise ValueError("Install local Tesseract OCR")
+        with tempfile.TemporaryDirectory() as root:
+            local=Path(root)/("document."+kind)
+            local.write_bytes(raw)
+            proc=subprocess.run([binary,str(local),"stdout","-l","spa+eng","--psm","6","tsv"],
+                 capture_output=True,timeout=30,check=False)
+            if proc.returncode or len(proc.stdout)>2_000_000:raise ValueError("OCR failed or exceeded limit")
+            words=[]
+            last=None
+            for row in csv.DictReader(io.StringIO(proc.stdout.decode("utf-8")),delimiter="\t"):
+                text=(row.get("text") or "").strip()
+                if not text or row.get("level")!="5":continue
+                score=float(row["conf"])/100
+                if not 0<=score<=1:raise ValueError("Invalid OCR score")
+                key=tuple(row[k] for k in ("block_num","par_num","line_num"))
+                words.append(("\n" if last is not None and last!=key else " ")+text)
+                scores.append(score);last=key
+            pages=["".join(words).strip()]
+        method="Tesseract"
     if not pages or not any(p.strip() for p in pages):
         raise ValueError("No readable text; provision local OCR and retry")
     if sum(map(len,pages))+sum(len(t["html_untrusted"]) for t in tables)>MAX_TEXT:

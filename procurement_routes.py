@@ -6,6 +6,7 @@ import json
 import os
 import re
 import sqlite3
+import subprocess
 import tempfile
 from pathlib import Path
 from fastapi import APIRouter,Request
@@ -48,7 +49,7 @@ def make_router(actor,body,origin,base,slots):
             if route=="report":
                 docs=store.documents(u["company"],True)
                 match=reconcile(docs,p["as_of"],p["tolerances"])
-                hist=historical_report(store,u["company"],True,p["as_of"],p.get("rise_pct","10"))
+                hist=historical_report(store,u["company"],True,p["as_of"],p.get("rise_pct","10"),snapshot=docs)
                 hist.pop("matching")
                 return {"matching":match,"history":hist,"synthetic":True}
         raise KeyError("Unknown route")
@@ -94,6 +95,6 @@ def make_router(actor,body,origin,base,slots):
         except PermissionError:return error(403,"Independent review required")
         except KeyError:return error(400,"Missing or invalid field")
         except (ValueError,TypeError,binascii.Error):return error(400,"Invalid or incompatible synthetic document")
-        except (sqlite3.Error,OSError,RuntimeError,ImportError):return error(503,"Local processing unavailable")
+        except (sqlite3.Error,OSError,RuntimeError,ImportError,subprocess.TimeoutExpired):return error(503,"Local processing unavailable")
         finally:slots.release()
     return router

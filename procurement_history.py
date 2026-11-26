@@ -19,12 +19,12 @@ def group(doc, line):
     return json.dumps([doc["supplier"].casefold(),line["sku"],line["unit"]],ensure_ascii=False)
 
 
-def historical_report(store, tenant, synthetic, as_of, rise_pct="10", alert_k=4, review_k=2):
+def historical_report(store, tenant, synthetic, as_of, rise_pct="10", alert_k=4, review_k=2, *, snapshot=None):
     day(as_of)
     rise = decimal(rise_pct)
     if not all(isinstance(k,(int,float)) and not isinstance(k,bool) and isfinite(k) for k in (alert_k,review_k)) or not 0 <= review_k < alert_k:
         raise ValueError("Invalid thresholds")
-    docs = [(d,h) for d,h in store.documents(tenant,synthetic) if d["date"] <= as_of]
+    docs = [(d,h) for d,h in (store.documents(tenant,synthetic) if snapshot is None else snapshot) if d["date"] <= as_of]
     # The existing deterministic engine remains the independent invoice audit.
     output=io.StringIO(newline="")
     writer=csv.writer(output);writer.writerow(FIELDS)

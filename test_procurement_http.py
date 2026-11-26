@@ -1,0 +1,88 @@
+import base64
+import os
+import re
+import tempfile
+import threading
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+from fastapi import FastAPI,Request
+from fastapi.testclient import TestClient
+from procurement_routes import make_router
+from procurement import canonical
+from test_procurement import order,delivery,invoice
+import tenant
+
+ORIGIN="http://localhost"
+PASSWORD="Synthetic-password-42!"
+class ProcurementHTTP(unittest.TestCase):
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory()
+        self.previous=tenant.ROOT;tenant.ROOT=Path(self.temp.name)
+        self.a=tenant.create_company("A");self.b=tenant.create_company("B")
+        self.ids={}
+        for company,login,role in [(self.a,"analyst-a","analyst"),(self.a,"owner-a","owner"),(self.a,"reader-a","reader"),(self.b,"owner-b","owner")]:
+            self.ids[login]=tenant.create_user(company,login,PASSWORD,role)
+        app=FastAPI()
+        def actor(req):return tenant.session(req.cookies.get("session",""))
+        async def body(req,limit):
+            raw=await req.body()
+            if len(raw)>limit:raise ValueError("Too large")
+            return raw
+        app.include_router(make_router(actor,body,ORIGIN,Path(__file__).parent,threading.BoundedSemaphore(4)))
+        self.app=app
+    def tearDown(self):
+        tenant.ROOT=self.previous;self.temp.cleanup()
+    def client(self,name):
+        c=TestClient(self.app,base_url=ORIGIN)
+        tok=tenant.authenticate(name,PASSWORD,"test-"+name)
+        c.cookies.set("session",tok)
+        c.headers.update({"origin":ORIGIN,"X-CSRF-Token":tenant.session(tok)["csrf"]})
+        return c
+    def send(self,c,route,obj):
+        return c.post("/procurement/api/"+route,json=obj)
+    def submit(self,c,doc):
+        raw=canonical(doc).encode()
+        r=self.send(c,"submit",{"candidate":doc,"source":base64.b64encode(raw).decode(),"evidence":"Synthetic source reviewed"})
+        self.assertEqual(r.status_code,200,r.text);return r.json()["id"],raw
+    def test_auth_and_csrf(self):
+        c=TestClient(self.app,base_url=ORIGIN)
+        self.assertEqual(c.get("/procurement").status_code,401)
+        a=self.client("analyst-a")
+        self.assertEqual(a.get("/procurement").status_code,200)
+        self.assertEqual(a.post("/procurement/api/submit",headers={"X-CSRF-Token":"wrong"},json={}).status_code,403)
+        self.assertEqual(a.get("/procurement/ui.js").status_code,200)
+    def test_full_review_matching_isolation(self):
+        a,b,reader,other=[self.client(n) for n in ("analyst-a","owner-a","reader-a","owner-b")]
+        for doc in (order(),delivery("R","90"),invoice("I","100","960")):
+            key,raw=self.submit(a,doc)
+            review={"id":key,"decision":"APPROVED","evidence":"Verified independent synthetic document"}
+            self.assertEqual(a.get("/procurement/api/source/"+key).content,raw)
+            self.assertEqual(other.get("/procurement/api/source/"+key).status_code,404)
+            self.assertEqual(self.send(a,"review",review).status_code,403)
+            self.assertEqual(self.send(reader,"review",review).status_code,403)
+            self.assertEqual(self.send(b,"review",review).status_code,200)
+            self.assertEqual(self.send(b,"review",review).status_code,403)
+        self.assertEqual(other.get("/procurement/api/cases").json(),[])
+        self.assertEqual(len(reader.get("/procurement/api/cases").json()),3)
+        r=self.send(reader,"report",{"as_of":"2026-01-31","tolerances":{}})
+        self.assertEqual(r.status_code,200,r.text)
+        self.assertEqual(r.json()["matching"]["potential_exposure_eur"],"150.00")
+        self.assertIsNone(r.json()["matching"]["confirmed_loss_eur"])
+    def test_owner_cannot_self_approve(self):
+        b=self.client("owner-a");key,_=self.submit(b,order())
+        self.assertEqual(self.send(b,"review",{"id":key,"decision":"APPROVED","evidence":"Cannot approve own document"}).status_code,403)
+    def test_rejection_no_learning(self):
+        a,b=self.client("analyst-a"),self.client("owner-a");key,_=self.submit(a,order())
+        self.assertEqual(self.send(b,"review",{"id":key,"decision":"REJECTED","evidence":"Synthetic document rejected"}).status_code,200)
+        r=self.send(b,"report",{"as_of":"2026-01-31","tolerances":{}})
+        self.assertEqual(r.json()["matching"]["lines"],[])
+    def test_extract_never_approved(self):
+        a=self.client("analyst-a")
+        with patch.dict(os.environ,{"BC_PROCUREMENT_LOCAL_MODEL":"","BC_PROCUREMENT_PADDLE_CONFIG":""}):
+            r=self.send(a,"extract",{"source":base64.b64encode(b"invoice,amount\nI1,100").decode(),"suffix":".csv"})
+        self.assertEqual(r.status_code,200,r.text)
+        self.assertEqual(r.json()["status"],"UNAPPROVED")
+        self.assertEqual(a.get("/procurement/api/cases").json(),[])
+
+if __name__=="__main__":unittest.main()
