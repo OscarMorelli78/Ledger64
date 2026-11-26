@@ -9,7 +9,7 @@ from unittest.mock import patch
 from fastapi import FastAPI,Request
 from fastapi.testclient import TestClient
 from procurement_routes import make_router
-from procurement import canonical
+from procurement import canonical,digest
 from test_procurement import order,delivery,invoice
 import tenant
 
@@ -84,5 +84,20 @@ class ProcurementHTTP(unittest.TestCase):
         self.assertEqual(r.status_code,200,r.text)
         self.assertEqual(r.json()["status"],"UNAPPROVED")
         self.assertEqual(a.get("/procurement/api/cases").json(),[])
+
+    def test_table_proposal_unapproved_and_source_bound(self):
+        a=self.client("analyst-a");raw=b"synthetic table"
+        doc=order();line=doc["lines"][0]
+        headers=list(line)
+        payload={"source":base64.b64encode(raw).decode(),"source_sha256":digest(raw),
+          "table":{"page":1,"status":"REVIEW_REQUIRED","cells":[headers,[line[k] for k in headers]]},
+          "metadata":{k:v for k,v in doc.items() if k!="lines"},"mapping":{k:k for k in headers}}
+        r=self.send(a,"table-propose",payload)
+        self.assertEqual(r.status_code,200,r.text)
+        self.assertEqual(r.json()["candidate"],doc)
+        self.assertEqual(r.json()["cell_evidence_status"],"OPERATOR_SUPPLIED_UNVERIFIED")
+        self.assertEqual(a.get("/procurement/api/cases").json(),[])
+        payload["source_sha256"]="a"*64
+        self.assertEqual(self.send(a,"table-propose",payload).status_code,400)
 
 if __name__=="__main__":unittest.main()

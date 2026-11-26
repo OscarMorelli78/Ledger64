@@ -10,6 +10,7 @@ from procurement_consensus import compare_image
 from procurement_semantic_v2 import propose_v2
 from procurement_table import table_drafts,propose_from_cells
 from procurement_geometry import extract_grid
+import procurement_table_templates as table_templates
 import procurement_templates as templates
 
 
@@ -62,16 +63,30 @@ def main():
     a=sub.add_parser("table-propose")
     a.add_argument("--extraction",type=Path,required=True);a.add_argument("--index",type=int,required=True)
     a.add_argument("--metadata",type=Path,required=True);a.add_argument("--mapping",type=Path,required=True)
+    a=sub.add_parser("table-template-register")
+    a.add_argument("--tenant",required=True);a.add_argument("--extraction",type=Path,required=True)
+    a.add_argument("--index",type=int,required=True);a.add_argument("--metadata",type=Path,required=True);a.add_argument("--mapping",type=Path,required=True)
+    a.add_argument("--proposer",required=True);a.add_argument("--reviewer",required=True);a.add_argument("--evidence",required=True)
+    a=sub.add_parser("table-template-apply")
+    a.add_argument("--tenant",required=True);a.add_argument("--id",required=True);a.add_argument("--extraction",type=Path,required=True)
+    a.add_argument("--index",type=int,required=True);a.add_argument("--metadata",type=Path,required=True)
     sub.add_parser("verify")
     args=parser.parse_args()
-    if args.action=="table-propose":
+    if args.action in ("table-propose","table-template-register","table-template-apply"):
         def read_json(path):
             if path.stat().st_size>2_000_000:raise ValueError("Oversized input JSON")
             return json.loads(path.read_text(encoding="utf-8"))
         extracted=read_json(args.extraction)
-        tables=extracted["structured_tables"]
+        tables=extracted.get("structured_tables",[extracted])
         if not 0<=args.index<len(tables):raise ValueError("Invalid table index")
-        result=propose_from_cells(tables[args.index],read_json(args.metadata),read_json(args.mapping),extracted["source_sha256"])
+        table=tables[args.index];metadata=read_json(args.metadata);source=extracted["source_sha256"]
+        if args.action=="table-propose":
+            result=propose_from_cells(table,metadata,read_json(args.mapping),source)
+        else:
+            with Store(args.db) as store:
+                if args.action=="table-template-register":
+                    result={"template_id":table_templates.register(store,args.tenant,True,table,metadata,read_json(args.mapping),source,args.proposer,args.reviewer,args.evidence)}
+                else:result=table_templates.apply(store,args.tenant,True,args.id,table,metadata,source)
     elif args.action=="extract":
         if args.grid:
             if args.consensus or args.ollama_model or args.paddle_config or args.pymupdf or args.semantic_v2:parser.error("--grid is a separate image-only strategy")

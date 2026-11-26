@@ -141,3 +141,16 @@ page, row, column, header and original source hash for each field. It does not
 use a language model to rewrite amounts. Duplicate headers, missing references,
 empty required fields and unsupported table shapes fail closed. The metadata is
 explicitly marked unverified; compare it to the original before independent review.
+
+## Document Intelligence V2
+
+Use `extract --grid` for bounded ruled PNG/JPG tables. Deskew supports small
+rotations ±5 degrees, not perspective correction or arbitrary borderless layouts.
+The authenticated pilot offers a grid strategy and editable extracted table cells,
+exact column mapping and manually supplied metadata. Proposals are bound to the
+original source hash and explicitly marked operator-supplied/unverified. This is
+not a guarantee that edits came from OCR. Independent original review remains
+mandatory. The trusted CLI `table-template-register` requires a matching previously
+approved document and source hash, distinct reviewer identities and evidence;
+`table-template-apply` reuses only column structure and rejects changed header sets
+or supplier/kind mismatches. It never reuses historical prices or quantities.
