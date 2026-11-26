@@ -95,6 +95,20 @@ class Recovery(unittest.TestCase):
         Path(str(dest)+"-wal").write_bytes(b"old")
         with self.assertRaises(FileExistsError):restore_backup(self.backup,dest,"A",m["sha256"])
         self.assertFalse(dest.exists())
+    def test_backup_sidecar_refused(self):
+        m=self.create();dest=self.root/"new.sqlite3"
+        Path(str(self.backup)+"-wal").write_bytes(b"unexpected")
+        with self.assertRaises(ValueError):restore_backup(self.backup,dest,"A",m["sha256"])
+        self.assertFalse(dest.exists())
+    def test_deleted_revision_queue_rejected(self):
+        with Store(self.db) as s:
+            s.db.execute("DELETE FROM procurement_revision_requests");s.db.commit()
+        with self.assertRaises(ValueError):self.create()
+    def test_original_tampering_rejected_even_with_new_checksum(self):
+        m=self.create()
+        with sqlite3.connect(self.backup) as c:
+            c.execute("UPDATE procurement_docs SET original=? WHERE kind='invoice'",(b"tamper",))
+        with self.assertRaises(ValueError):verify_backup(self.backup,"A",file_hash(self.backup))
     def test_wrong_expected_hash_and_tenant(self):
         m=self.create()
         with self.assertRaises(ValueError):verify_backup(self.backup,"A","a"*64)

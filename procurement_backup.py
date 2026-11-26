@@ -61,7 +61,7 @@ def check_database(path,tenant):
         c.execute("BEGIN")
         if c.execute("PRAGMA integrity_check").fetchall()!=[("ok",)]:raise ValueError("SQLite integrity failure")
         if c.execute("PRAGMA foreign_key_check").fetchone():raise ValueError("Foreign key failure")
-        schema=c.execute("SELECT type,name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'").fetchall()
+        schema=c.execute("SELECT type,name,sql FROM sqlite_master WHERE substr(name,1,7) != 'sqlite_'").fetchall()
         tables={name for typ,name,sql in schema if typ=="table"}
         if not {"procurement_docs","procurement_events"}<=tables<=set(COLUMNS):raise ValueError("Unexpected database tables")
         for typ,name,sql in schema:
@@ -150,9 +150,10 @@ def create_backup(source,destination,tenant):
     with tempfile.TemporaryDirectory(prefix=".ledger64-",dir=dst.parent) as temp:
         stage=Path(temp)/"snapshot.sqlite3"
         deadline=time.monotonic()+60
-        def progress(status,remaining,total):
-            if time.monotonic()>deadline or total*512>LIMIT:raise TimeoutError("Backup time or page limit")
         with closing(readonly(src)) as origin,closing(sqlite3.connect(stage)) as dest:
+            page_size=origin.execute("PRAGMA page_size").fetchone()[0]
+            def progress(status,remaining,total):
+                if time.monotonic()>deadline or total*page_size>LIMIT:raise TimeoutError("Backup time or page limit")
             origin.backup(dest,pages=128,progress=progress,sleep=.05)
             dest.execute("PRAGMA journal_mode=DELETE")
         if stage.stat().st_size>LIMIT:raise ValueError("Snapshot too large")
@@ -176,6 +177,8 @@ def verify_backup(source,tenant,expected_sha256):
 
 def restore_backup(source,destination,tenant,expected_sha256):
     src=source_path(source);dst=target_path(destination)
+    if any(os.path.lexists(str(src)+s) for s in ("-wal","-shm","-journal")):
+        raise ValueError("Backup has unexpected sidecars")
     with tempfile.TemporaryDirectory(prefix=".ledger64-",dir=dst.parent) as temp:
         stage=Path(temp)/"restore.sqlite3"
         # Verify the exact copied bytes, not a mutable source after validation.
