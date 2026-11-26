@@ -88,9 +88,10 @@ def prepare_cell(image,*,scale=1,tight=False,binarize=False):
         box=dark(image).getbbox()
         if box:image=image.crop(box)
     if binarize:image=image.convert("L").point(lambda x:0 if x<160 else 255)
-    if (image.width*scale+24)*(image.height*scale+24)>MAX_PIXELS:raise ValueError("Oversized cell variant")
+    border=20 if tight or scale==3 else 12
+    if (image.width*scale+2*border)*(image.height*scale+2*border)>MAX_PIXELS:raise ValueError("Oversized cell variant")
     if scale!=1:image=image.resize((image.width*scale,image.height*scale),Image.Resampling.LANCZOS)
-    return ImageOps.expand(image,border=12,fill=255)
+    return ImageOps.expand(image,border=border,fill=255)
 
 def read_cell(binary,image,path,*,language="spa+eng",psm=7,upscale=False,scale=None,tight=False,binarize=False,no_dictionary=False):
     scale=scale if scale is not None else (2 if upscale and image.width*image.height*4<=MAX_PIXELS else 1)
@@ -172,6 +173,7 @@ def reread_cells(raw,table,positions):
                 dict(language="eng",psm=7,scale=2),
                 dict(language="eng",psm=8,scale=2),
                 dict(language="spa+eng",psm=13,scale=2),
+                dict(language="eng",psm=7,scale=3,no_dictionary=True),
                 dict(language="eng",psm=7,scale=3,tight=True,no_dictionary=True),
                 dict(language="eng",psm=8,scale=2,tight=True,binarize=True,no_dictionary=True),
             )

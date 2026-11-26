@@ -37,7 +37,7 @@ class GeometryTests(unittest.TestCase):
         im=Image.new("L",(100,60),255)
         ImageDraw.Draw(im).rectangle((20,20,40,30),fill=0)
         out=prepare_cell(im,scale=3,tight=True)
-        self.assertEqual(out.size,(21*3+24,11*3+24))
+        self.assertEqual(out.size,(21*3+40,11*3+40))
         self.assertEqual(im.size,(100,60))
         with self.assertRaises(ValueError):prepare_cell(im,scale=10)
     def test_dictionary_disabled_without_character_forcing(self):
