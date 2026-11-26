@@ -6,7 +6,9 @@ Open-source invoice auditing, purchase cost comparison and financial governance 
 
 [English](README.en.md) · [Español](README.es.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Deutsch](README.de.md) · [Português (Brasil)](README.pt-BR.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [हिन्दी](README.hi.md)
 
-**Release candidate: use synthetic data only. Not accounting or tax certification. EUR purchases only; no credit notes. ALE is experimental and offline. Docker execution and hosted deployment require independent acceptance.**
+**Stable source distribution v0.1.0:** [download and checksums](https://github.com/OscarMorelli78/Ledger64/releases/tag/v0.1.0) · [verified CI acceptance](https://github.com/OscarMorelli78/Ledger64/actions/runs/45844526093) · [international project website](https://oscarmorelli78.github.io/Ledger64/).
+
+**Use synthetic data only until deployment-specific security, privacy and real-data validation pass.** Not accounting or tax certification. EUR purchases only; no credit notes. ALE is experimental and offline. CI is not independent production certification.
 
 ## Quick start
 
@@ -59,5 +61,7 @@ MIT applies to original code; dependencies retain licenses. Never commit persona
 
 
 ## Community & professional services
+
+[Explore the developer's public GitHub portfolio](https://github.com/OscarMorelli78?tab=repositories) · [AI and business automation portfolio](https://github.com/OscarMorelli78/ConsultorIA)
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
