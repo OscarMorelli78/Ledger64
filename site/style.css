@@ -1,0 +1,1 @@
+*{box-sizing:border-box}body{margin:0;padding:clamp(12px,4vw,48px);background:#8585d5;color:#c7c8ff;font:18px/1.6 monospace}main{max-width:920px;margin:auto;background:#292477;padding:clamp(18px,5vw,60px);border:2px solid #aaa9ed}h1{font-size:clamp(28px,5vw,52px);line-height:1.2;color:#b9efaa}h2{font-size:1.3em}

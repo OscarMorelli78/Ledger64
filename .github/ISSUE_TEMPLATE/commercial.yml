@@ -1,0 +1,27 @@
+name: Commercial enquiry
+description: Request information about professional services (public, no sensitive data).
+title: "[Commercial] "
+body:
+  - type: markdown
+    attributes:
+      value: "This issue is PUBLIC. Do not enter names, email, company identifiers, invoices, credentials, financial or private information. Request a private channel before sharing details."
+  - type: dropdown
+    id: service
+    attributes:
+      label: Service
+      options: [Installation, Support, Integration, Custom development, Training, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: General objective (no confidential data)
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I understand that this issue is public and contains no confidential data.
+          required: true
