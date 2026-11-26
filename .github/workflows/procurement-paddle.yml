@@ -26,13 +26,13 @@ jobs:
           EOF
           docker build -t ledger64-paddle-experiment "$RUNNER_TEMP/paddle-build"
           docker run --rm ledger64-paddle-experiment python -m pip freeze > "$RUNNER_TEMP/paddle-report/dependencies.txt"
-      - name: Provision models online (no documents)
+      - name: Provision models online (synthetic warmup only)
         run: |
           docker volume create ledger64-paddle-models
           docker run --rm --cap-drop ALL -v ledger64-paddle-models:/models -v "$GITHUB_WORKSPACE:/src:ro" -w /src ledger64-paddle-experiment python scripts/benchmark_procurement_tables.py provision --config /models/pipeline.yaml
       - name: Test real model with network disabled
         run: |
-          chmod 777 "$RUNNER_TEMP/paddle-report"
+          chmod 755 "$RUNNER_TEMP/paddle-report"
           docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges -v ledger64-paddle-models:/models -v "$GITHUB_WORKSPACE:/src:ro" -v "$RUNNER_TEMP/paddle-report:/report" -w /src ledger64-paddle-experiment python scripts/benchmark_procurement_tables.py evaluate --config /models/pipeline.yaml --output /report/tables.json
       - uses: actions/upload-artifact@v6
         if: always()

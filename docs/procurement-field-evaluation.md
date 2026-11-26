@@ -49,3 +49,8 @@ conflicting valid candidates always abstain rather than voting. Only the known
 labelled layout is supported. Agreement is not proof of correctness. A separate
 PP-StructureV3 workflow measures twelve table cells per synthetic image under
 network-disabled inference, with the original versions and dependencies recorded.
+
+Paddle run 45880925169 failed during offline inference because the lazy table
+orientation classifier was not provisioned. The corrected provisioning stage
+warms up the full table pipeline with distinct synthetic values before removing
+network access. Acceptance fixtures remain separate; no customer data is used.

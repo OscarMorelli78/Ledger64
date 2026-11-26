@@ -1,6 +1,6 @@
 """Synthetic-only PP-StructureV3 table-cell acceptance experiment.
 
-Provisioning and inference are separate commands. Run inference in a container
+Provisioning uses a distinct synthetic warmup. Run acceptance inference in a container
 with --network none. No customer documents accepted by this entrypoint.
 """
 import argparse,json,time,resource,sys
@@ -35,7 +35,7 @@ def parse_table(html):
     if p.invalid or p.row is not None or p.cell is not None:raise ValueError("Unsupported table structure")
     return p.rows
 
-def table_fixture(path,variant):
+def table_fixture(path,variant,rows=EXPECTED):
     from PIL import Image,ImageDraw,ImageFont
     im=Image.new("RGB",(1500,1000),"white");d=ImageDraw.Draw(im)
     f=ImageFont.truetype("DejaVuSans.ttf",40)
@@ -44,7 +44,7 @@ def table_fixture(path,variant):
     xs=[70,430,700,1010,1430];ys=[300,390,480,570]
     for x in xs:d.line((x,ys[0],x,ys[-1]),fill="black",width=4)
     for y in ys:d.line((xs[0],y,xs[-1],y),fill="black",width=4)
-    for i,row in enumerate(EXPECTED):
+    for i,row in enumerate(rows):
         for j,value in enumerate(row):d.text((xs[j]+22,ys[i]+20),value,fill="black",font=f)
     d.text((70,680),"Net total: 220.75 EUR",fill="black",font=f)
     if variant:im=im.rotate(2,expand=True,fillcolor="white")
@@ -62,8 +62,14 @@ def main():
     if args.mode=="provision":
         from paddleocr import PPStructureV3
         pipeline=PPStructureV3(device="cpu",use_doc_orientation_classify=False,use_doc_unwarping=False,use_textline_orientation=False,use_seal_recognition=False,use_formula_recognition=False,use_chart_recognition=False)
+        # Some PaddleX table models are initialized lazily on the first prediction.
+        import tempfile
+        with tempfile.TemporaryDirectory() as root:
+            warm=Path(root)/"warmup.png"
+            table_fixture(warm,0,[["SKU","QTY","UNIT","TOTAL"],["WARM-A","2","3.00","6.00"],["WARM-B","4","5.00","20.00"]])
+            list(pipeline.predict(input=str(warm)))
         pipeline.export_paddlex_config_to_yaml(str(args.config))
-        print("Provisioned model configuration; no documents processed")
+        print("Provisioned model configuration and warmed lazy models using distinct synthetic fixture only")
         return
     from procurement_ingest import extract
     import tempfile
