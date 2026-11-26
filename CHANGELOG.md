@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Procurement Intelligence / Document Intelligence V2 / Data Resilience
+- Add opt-in synthetic-only procurement pilot: cumulative order/receipt/invoice matching, partial receipts, multiple invoices, configurable tolerances and percentage discounts.
+- Local document extraction, ruled-table OCR, deskew, optional offline PaddleOCR, literal alternate reference readings, visual cell editing and reviewed supplier templates.
+- Supervised historical signals, independent document approvals, append-only corrections/revocations, retained originals and verified new-path SQLite restoration.
+- 108 specific tests and six CI runs passed at f9fd4a66; OCR 52/52 lightweight cells; five-image acceptance 4/5 first-pass, 5/5 simulated review; EUR 150 documented exposure after restoration. Qwen models failed acceptance. No production authorization.
+- Nine expanded manuals and README entries. Existing stable release unchanged.
+
 ## 0.1.0 — stable distribution candidate
 - Alpine runtime, Devanagari fonts, writable temporary font cache, updated dependencies and Node 24-based CI actions.
 - Traefik replaces Caddy as the default proxy; no Docker socket, bounded requests, TLS routing checks and independent image scan.

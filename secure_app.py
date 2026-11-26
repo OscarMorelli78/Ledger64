@@ -50,6 +50,11 @@ async def body(req,limit):
         result.extend(chunk)
     if not result:raise InputError('Solicitud vacía')
     return bytes(result)
+# Additive synthetic-only pilot, disabled by default.
+if os.environ.get('BC_PROCUREMENT_PILOT')=='1':
+    from procurement_routes import make_router
+    app.include_router(make_router(actor,body,ORIGIN,BASE,AUDIT_SLOTS))
+
 @app.get('/login')
 def login_page(req:Request):return HTMLResponse(localize_html((BASE/'login.html').read_text(encoding='utf-8'),locale(req)))
 @app.post('/login')

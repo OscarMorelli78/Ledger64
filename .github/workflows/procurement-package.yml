@@ -1,0 +1,50 @@
+name: Experimental procurement source package
+on:
+  push:
+    branches: [feat/adaptive-procurement-v1]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    if: github.ref == 'refs/heads/feat/adaptive-procurement-v1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: python -m pip install -r requirements.txt
+      - name: Execute the local synthetic pilot and recovery
+        run: |
+          set -euo pipefail
+          mkdir -m 700 "$RUNNER_TEMP/pilot"
+          p="$RUNNER_TEMP/pilot"
+          python -m procurement_cli --db "$p/source.sqlite3" demo
+          python -m procurement_backup create --source "$p/source.sqlite3" --destination "$p/backup.sqlite3" --tenant demo > "$p/manifest.json"
+          sha=$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["sha256"])' "$p/manifest.json")
+          python -m procurement_backup restore --source "$p/backup.sqlite3" --destination "$p/recovered.sqlite3" --tenant demo --sha256 "$sha"
+          python -m procurement_cli --db "$p/recovered.sqlite3" match --tenant demo --as-of 2026-01-31 > "$p/report.json"
+          python -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["potential_exposure_eur"]=="150.00" and d["confirmed_loss_eur"] is None'
+      - name: Build tracked-source snapshot
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/package" "$RUNNER_TEMP/source"
+          git archive "$GITHUB_SHA" | tar -xf - -C "$RUNNER_TEMP/source"
+          cd "$RUNNER_TEMP/source"
+          rm -f SHA256SUMS
+          find . -type f -print0 | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/package/SHA256SUMS"
+          cp "$RUNNER_TEMP/package/SHA256SUMS" .
+          sha256sum -c SHA256SUMS
+          tar -czf "$RUNNER_TEMP/package/Ledger64-experimental.tar.gz" .
+          cd "$RUNNER_TEMP/package"
+          sha256sum Ledger64-experimental.tar.gz > Ledger64-experimental.tar.gz.sha256
+          printf '%s\n' "$GITHUB_SHA" > COMMIT.txt
+      - uses: actions/upload-artifact@v6
+        with:
+          name: Ledger64-experimental-source
+          path: ${{ runner.temp }}/package/
+          retention-days: 7

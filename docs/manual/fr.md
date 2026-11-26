@@ -121,3 +121,42 @@ python scripts/doctor.py
 python scripts/check.py
 ```
 [README](../../README.fr.md) · [SECURITY](../../SECURITY.md) · [LICENSE](../../LICENSE)
+
+## 14. Intelligence achats — pilote expérimental
+
+Agent d’intelligence achats pour PME : noyau déterministe MIT, traitement exclusivement local et apprentissage supervisé. Open Core est la stratégie commerciale ; aucune extension payante incluse. Aucun paiement exécuté.
+
+Utilisez la branche expérimentale, non la version stable v0.1.0. Données synthétiques uniquement. Suivez la section 1, créez deux comptes distincts analyste et propriétaire, activez la variable avant Uvicorn, connectez-vous et ouvrez /procurement. Désactivé par défaut. GitHub Pages est une démo statique, pas ce serveur Python.
+
+```bash
+git clone -b feat/adaptive-procurement-v1 https://github.com/OscarMorelli78/Ledger64.git Ledger64-pilot
+# Linux/macOS, before starting Uvicorn:
+export BC_PROCUREMENT_PILOT=1
+```
+```powershell
+$env:BC_PROCUREMENT_PILOT = "1"
+```
+
+http://127.0.0.1:8765/procurement
+
+Importez PDF, XLSX, CSV, JSON, PNG ou JPG compatibles (2 Mo max.). Extraction standard pour texte numérique et OCR local ; grille légère pour images quadrillées compatibles, comparaison pour formats étiquetés connus. Petites rotations (±5°) corrigées ; tableaux sans bordures et documents arbitraires non garantis. PaddleOCR/PP-Structure est facultatif et gourmand. Les modèles Qwen testés ont échoué à l’acceptation automatique. OCR anglais/espagnol.
+
+Vérifiez les cellules et saisissez les métadonnées (type, ID, fournisseur, date, EUR). Associez les en-têtes exacts aux champs canoniques, sans inventer de valeurs. Demandez des lectures alternatives pour les identifiants ambigus. Comparez l’original. Soumettez le brouillon avec preuves ; un autre propriétaire contrôle. Une référence compatible n’autorise pas un paiement. Modèles CSV/tableaux fournisseur via CLI de confiance : seule la structure est réutilisée.
+
+Approuvez commandes, réceptions et factures. Rapprochement cumulatif par ligne pour livraisons partielles et factures multiples ; tolérances quantité, EUR et pourcentage de prix. Remises contractuelles et anomalies historiques calculées de façon déterministe. Exposition et économies estimées ne prouvent pas une perte payée. Correction : version ajoutée, original conservé ; révocation : exclusion des rapports et de l’apprentissage actuels. Validation indépendante obligatoire.
+
+### Sauvegarde et récupération locales
+
+Avant toute bascule, arrêtez le service. Répertoires privés existants, SHA-256 conservé séparément, restauration vers un nouveau fichier uniquement. Base achats : originaux, versions, files de revue, modèles ; signaux historiques reconstruits. Authentification et base principale à sauvegarder séparément. Pas encore de chiffrement ni de planification. Ne publiez jamais de données d’entreprise sur GitHub.
+
+```bash
+python -m procurement_backup create --source /private/procurement.sqlite3 --destination /backup/snapshot.sqlite3 --tenant COMPANY_ID
+python -m procurement_backup verify --source /backup/snapshot.sqlite3 --tenant COMPANY_ID --sha256 EXPECTED_HASH
+python -m procurement_backup restore --source /backup/snapshot.sqlite3 --destination /recovery/recovered.sqlite3 --tenant COMPANY_ID --sha256 EXPECTED_HASH
+```
+
+### Preuves et limites
+
+Acceptation synthétique : 108 tests, cinq images (4/5 au premier passage, 5/5 après revue simulée), exposition de 150 EUR reproduite après restauration. OCR léger : 52/52 cellules, quatre tableaux, moyenne 2,15 s, pic échantillonné 94,8 MiB. Paddle : 24/24 cellules, deux tableaux, objectifs de ressources non atteints. Pas de certification de production. Thème moderne, formats variés, chiffrement, récupération complète et validation réelle restent à faire.
+
+[CI — f9fd4a66](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CLI](../procurement-pilot.md) · [Backup](../procurement-data-resilience.md)

@@ -61,3 +61,9 @@ MIT gilt für Originalcode; Abhängigkeiten behalten ihre Lizenzen. Keine person
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## Experimentelle Einkaufsintelligenz
+
+Lokaler Pilot mit Drei-Wege-Abgleich, geprüfter OCR, Vorlagen, Korrekturen und verifizierter Wiederherstellung. Nur synthetische Daten; siehe neues Handbuchkapitel.
+
+[Experimentelle Einkaufsintelligenz](docs/manual/de.md) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)

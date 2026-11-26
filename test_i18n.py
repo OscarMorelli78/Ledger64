@@ -37,7 +37,7 @@ class LocalizationTests(unittest.TestCase):
     data=report_pdf(report,l);reader=PdfReader(io.BytesIO(data));self.assertGreaterEqual(len(reader.pages),1);self.assertEqual(reader.metadata.title,tr('Informe ejecutivo de compras',l));self.assertIn('30.00',' '.join(p.extract_text() for p in reader.pages));self.assertEqual(json.dumps(report,sort_keys=True),before)
  def test_docs_marketing(self):
   for l in LANGS:
-   self.assertGreater((ROOT/f'README.{l}.md').stat().st_size,1500);m=(ROOT/'docs/manual'/f'{l}.md').read_text(encoding='utf-8');self.assertEqual(len(re.findall(r'^## \d+\.',m,re.M)),13);self.assertIn('python admin.py',m)
+   self.assertGreater((ROOT/f'README.{l}.md').stat().st_size,1500);m=(ROOT/'docs/manual'/f'{l}.md').read_text(encoding='utf-8');self.assertEqual(len(re.findall(r'^## \d+\.',m,re.M)),14);self.assertIn('python admin.py',m);self.assertIn('BC_PROCUREMENT_PILOT',m);self.assertIn('procurement_backup restore',m);self.assertIn('45889543410',m)
    p=ROOT/'site'/('index.html' if l=='en' else l+'.html');s=p.read_text(encoding='utf-8');self.assertIn('lang="'+l+'"',s);self.assertIn('noindex,follow',s)
   with (ROOT/'marketing/keywords-multilingual.csv').open(encoding='utf-8') as f:rows=list(csv.DictReader(f))
   self.assertEqual(len(rows),135);self.assertEqual(set(r['language'] for r in rows),set(LANGS))

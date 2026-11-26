@@ -61,3 +61,9 @@ MITは独自コードに適用、依存は各ライセンス。個人ID、企業
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## 実験的購買インテリジェンス
+
+ローカル試験版：三点照合、確認付きOCR、テンプレート、訂正、検証済み復元。合成データのみ。新しいマニュアル章を参照。
+
+[実験的購買インテリジェンス](docs/manual/ja.md) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)
