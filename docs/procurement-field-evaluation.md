@@ -62,3 +62,22 @@ Apache-2.0 weights per Ollama's model documentation), a compact array schema,
 source-derived row evidence and independent labelled-layout verification.
 The quality gate stays unchanged. This is not a default model or production
 license approval. The larger model increases hardware requirements.
+
+## Document Intelligence V2
+
+Paddle run 45881442906 completed inference offline: normal table 12/12 cells,
+rotated table had an entire-column permutation (all values retained with their
+headers), raw positions 0/12. The report write also failed on mount permissions.
+The next benchmark preserves both raw positional metrics and exact-header-aligned
+metrics, with no fuzzy matching. It uses a single serialized CPU pipeline per
+process and bounded deskew. The artifact is copied from the stopped container
+rather than changing host permissions. Raw and normalized metrics must not be
+confused. Qwen2.5 7B run 45881621343 also failed all complete document candidates;
+it is not a default extraction model.
+
+A separate lightweight ruled-grid route uses local Tesseract, exact cell geometry
+and bounded deskew; no heavyweight model or LLM. Acceptance: four new synthetic
+layouts (0, +2, -3 degrees, extra row and alternate headings), all exact cells,
+mean <10 s, sampled process-tree RSS <4,000,000 KiB. RSS is approximate and sums
+shared pages. Results apply only to these ruled-table layouts. Unsupported layouts
+abstain; PDF deskew, perspective and borderless tables remain separate gates.

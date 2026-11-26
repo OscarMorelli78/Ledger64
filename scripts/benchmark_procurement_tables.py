@@ -3,10 +3,11 @@
 Provisioning uses a distinct synthetic warmup. Run acceptance inference in a container
 with --network none. No customer documents accepted by this entrypoint.
 """
-import argparse,json,time,resource,sys
+import argparse,json,time,resource,sys,os
 from pathlib import Path
 from html.parser import HTMLParser
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from procurement_table import canonical_columns
 
 EXPECTED=[["SKU","QTY","UNIT","TOTAL"],["AX-123","17","8.25","140.25"],["BX-789","23","3.50","80.50"]]
 
@@ -47,7 +48,7 @@ def table_fixture(path,variant,rows=EXPECTED):
     for i,row in enumerate(rows):
         for j,value in enumerate(row):d.text((xs[j]+22,ys[i]+20),value,fill="black",font=f)
     d.text((70,680),"Net total: 220.75 EUR",fill="black",font=f)
-    if variant:im=im.rotate(2,expand=True,fillcolor="white")
+    if variant:im=im.rotate(variant,expand=True,fillcolor="white")
     im.save(path)
 
 def metrics(rows):
@@ -75,19 +76,23 @@ def main():
     import tempfile
     results=[]
     with tempfile.TemporaryDirectory() as root:
-        for i in range(2):
-            f=Path(root)/("table"+str(i)+".png");table_fixture(f,i)
+        for i,angle in enumerate((0,2)):
+            f=Path(root)/("table"+str(i)+".png");table_fixture(f,angle)
             start=time.perf_counter()
             result=extract(f,paddle_config=args.config)
             tables=[parse_table(t["html_untrusted"]) for t in result["tables"]]
-            scored=[metrics(t) for t in tables]
-            best=max(scored,key=lambda m:m["correct_cells"],default=metrics([]))
+            raw_metrics=metrics(tables[0]) if len(tables)==1 else metrics([])
+            aligned=[]
+            if len(tables)==1:
+                try:aligned=canonical_columns(tables[0],EXPECTED[0])["cells"]
+                except ValueError:pass
+            best=metrics(aligned)
             results.append(dict(case=i,elapsed_seconds=round(time.perf_counter()-start,3),peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
-              table_count=len(tables),tables=tables,**best))
+              table_count=len(tables),tables=tables,raw_position_metrics=raw_metrics,rectification=result.get("rectification"),aligned_table=aligned,**best))
     report={"scope":"synthetic table recognition only; not financial validation","cases":results}
     output=json.dumps(report,indent=2)
     print(output)
     if args.output:args.output.write_text(output+"\n")
-    if not all(r["exact"] and r["table_count"]==1 for r in results):raise SystemExit("Synthetic table-cell gate failed")
+    if not all(r["exact"] and r["table_count"]==1 for r in results):raise SystemExit("Synthetic header-associated table-cell gate failed")
 
 if __name__=="__main__":main()

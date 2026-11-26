@@ -25,9 +25,12 @@ jobs:
       - run: python scripts/benchmark_procurement_fields.py --backend text --gate
       - run: python scripts/benchmark_procurement_fields.py --backend tesseract --output "$RUNNER_TEMP/procurement-fields.json"
       - run: python scripts/benchmark_procurement_fields.py --backend consensus --output "$RUNNER_TEMP/procurement-consensus.json"
+      - run: python scripts/benchmark_procurement_grid.py --output "$RUNNER_TEMP/procurement-grid.json" --gate
       - uses: actions/upload-artifact@v6
+        if: always()
         with:
           name: procurement-field-benchmark
           path: |
             ${{ runner.temp }}/procurement-fields.json
             ${{ runner.temp }}/procurement-consensus.json
+            ${{ runner.temp }}/procurement-grid.json
