@@ -1,0 +1,51 @@
+name: Ledger64 project website
+on:
+  workflow_dispatch:
+  push:
+    branches: [Main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/pages.yml'
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: ledger64-pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Stage public project documentation only
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, shutil
+          target = Path('_pages')
+          target.mkdir()
+          pages = ['index','es','fr','it','de','pt-BR','zh-CN','ja','hi']
+          for name in pages:
+              source = Path('site') / (name + '.html')
+              text = source.read_text(encoding='utf-8')
+              text = re.sub(r'<a\b[^>]*href="contact\.html"[^>]*>.*?</a>', '<a href="https://github.com/OscarMorelli78/Ledger64">GitHub</a>', text, flags=re.I|re.S)
+              text = text.replace('</main>', '<p><a href="https://github.com/OscarMorelli78/Ledger64">Source code / MIT</a> | <a href="https://github.com/sponsors/OscarMorelli78">Support open-source development</a></p></main>')
+              (target / source.name).write_text(text, encoding='utf-8')
+          for name in ('style.css', 'robots.txt'):
+              shutil.copyfile(Path('site') / name, target / name)
+          (target / '.nojekyll').touch()
+          assert len(list(target.glob('*.html'))) == 9
+          assert not any('contact.html' in p.read_text(encoding='utf-8') for p in target.glob('*.html'))
+          PY
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _pages
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
