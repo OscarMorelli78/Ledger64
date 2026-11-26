@@ -10,6 +10,10 @@ Open-source invoice auditing, purchase cost comparison and financial governance 
 
 **Use synthetic data only until deployment-specific security, privacy and real-data validation pass.** Not accounting or tax certification. EUR purchases only; no credit notes. ALE is experimental and offline. CI is not independent production certification.
 
+## Try Ledger64 in your browser
+
+**[TRY LIVE DEMO — English / Español](https://oscarmorelli78.github.io/Ledger64/demo/)** — No installation, no account, synthetic data only. This standalone JavaScript demonstration illustrates invoice checks, price comparisons and estimated savings; it does not run the original Python engine or certify financial results.
+
 ## Quick start
 
 Install Python 3.13, Node.js for regression tests, Tesseract with English and Spanish models for OCR, Pango and Noto fonts for PDF. Create a virtual environment and install the pinned dependencies. On Windows use PowerShell activation and `$env:` variables. Set a private data directory; never expose the legacy `app.py`.
