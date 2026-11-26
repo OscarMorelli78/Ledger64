@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency:
-      group: container-acceptance
+      group: container-acceptance-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v6
@@ -45,7 +45,9 @@ jobs:
           test "$(docker image inspect ledger64:ci --format '{{.Config.User}}')" = 10001
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          version: 'v0.76.2'
           image-ref: ledger64:ci
+          scanners: vuln
           severity: CRITICAL,HIGH
           exit-code: '1'
           format: table
