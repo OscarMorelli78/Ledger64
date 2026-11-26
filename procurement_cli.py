@@ -9,6 +9,7 @@ from procurement_ingest import extract, propose, load_source
 from procurement_consensus import compare_image
 from procurement_semantic_v2 import propose_v2
 from procurement_table import table_drafts,propose_from_cells
+from procurement_geometry import extract_grid
 import procurement_templates as templates
 
 
@@ -50,7 +51,7 @@ def main():
     a.add_argument("source",type=Path);a.add_argument("--paddle-config",type=Path)
     a.add_argument("--pymupdf",action="store_true");a.add_argument("--ollama-model")
     a.add_argument("--confidence",type=float,default=.90)
-    a.add_argument("--consensus",action="store_true");a.add_argument("--semantic-v2",action="store_true")
+    a.add_argument("--grid",action="store_true");a.add_argument("--consensus",action="store_true");a.add_argument("--semantic-v2",action="store_true")
     a=sub.add_parser("template-register")
     a.add_argument("--tenant",required=True);a.add_argument("--kind",required=True)
     a.add_argument("--supplier",required=True);a.add_argument("--mapping",type=Path,required=True)
@@ -72,7 +73,11 @@ def main():
         if not 0<=args.index<len(tables):raise ValueError("Invalid table index")
         result=propose_from_cells(tables[args.index],read_json(args.metadata),read_json(args.mapping),extracted["source_sha256"])
     elif args.action=="extract":
-        if args.consensus:
+        if args.grid:
+            if args.consensus or args.ollama_model or args.paddle_config or args.pymupdf or args.semantic_v2:parser.error("--grid is a separate image-only strategy")
+            raw,_=load_source(args.source)
+            result=extract_grid(raw)
+        elif args.consensus:
             if args.ollama_model or args.paddle_config or args.pymupdf or args.semantic_v2:parser.error("--consensus is a separate image-only strategy")
             result=compare_image(args.source)
         else:

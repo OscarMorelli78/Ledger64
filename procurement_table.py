@@ -92,3 +92,19 @@ def propose_from_cells(table,metadata,mapping,source_sha256):
     return {"status":"REVIEW_REQUIRED","candidate":candidate,"source_sha256":source_sha256,
             "cell_evidence":evidence,"metadata_status":"MANUALLY_SUPPLIED_UNVERIFIED",
             "warning":"Review all metadata and cell readings against original. No automatic approval."}
+
+
+def canonical_columns(rows,headers):
+    """Align exact unique headers, preserving every raw cell and row association."""
+    if not isinstance(rows,list) or not rows or not isinstance(headers,list) or not headers:
+        raise ValueError("Table and canonical headers required")
+    source=rows[0]
+    if not isinstance(source,list) or not all(isinstance(v,str) and v for v in source+headers):
+        raise ValueError("Invalid headers")
+    if len(set(source))!=len(source) or len(set(headers))!=len(headers) or set(source)!=set(headers):
+        raise ValueError("Missing, duplicate or unexpected header")
+    if any(not isinstance(r,list) or len(r)!=len(source) or not all(isinstance(v,str) for v in r) for r in rows):
+        raise ValueError("Ragged table")
+    indices=[source.index(h) for h in headers]
+    return {"cells":[[r[i] for i in indices] for r in rows],
+            "source_columns":[i+1 for i in indices],"status":"REVIEW_REQUIRED"}

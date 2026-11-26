@@ -8,6 +8,7 @@ until deployment-specific isolation and licensing have been verified.
 from __future__ import annotations
 
 import io
+import threading
 import shutil
 import subprocess
 import csv
@@ -20,6 +21,20 @@ from procurement import digest, validate, MAX_DOC
 
 MAX_TEXT=100_000
 MAX_PIXELS=8_000_000
+_PADDLE_LOCK=threading.Lock()
+_PADDLE_STATE=None
+
+
+def paddle_pipeline(config):
+    """Single configuration per process; caller holds _PADDLE_LOCK across prediction."""
+    global _PADDLE_STATE
+    signature=(str(config),digest(config.read_bytes()))
+    if _PADDLE_STATE is None:
+        from paddleocr import PPStructureV3
+        _PADDLE_STATE=(signature,PPStructureV3(paddlex_config=str(config),device="cpu",cpu_threads=2))
+    elif _PADDLE_STATE[0]!=signature:
+        raise ValueError("Restart process to change Paddle configuration")
+    return _PADDLE_STATE[1]
 
 
 def load_source(path):
@@ -81,19 +96,28 @@ def extract(path, *, paddle_config=None, use_pymupdf=False, tesseract_psm=6, enh
     method="text"
     scores=[]
     tables=[]
+    transform=None
     if paddle_config is not None:
         if kind not in ("pdf","png","jpg"):raise ValueError("Paddle applies to PDF/images only")
         config=Path(paddle_config).resolve(strict=True)
         if not config.is_file():raise ValueError("Local configuration required")
         if kind=="pdf" and len(pages)>5:raise ValueError("OCR max 5 pages")
-        from paddleocr import PPStructureV3
-        pipeline=PPStructureV3(paddlex_config=str(config),device="cpu")
         method="PP-StructureV3"
         pages=[]
         with tempfile.TemporaryDirectory() as root:
             local=Path(root)/("document."+kind)
-            local.write_bytes(raw)
-            for item in pipeline.predict(input=str(local)):
+            if kind in ("png","jpg"):
+                from PIL import Image
+                from procurement_geometry import deskew
+                with Image.open(io.BytesIO(raw)) as im:
+                    corrected,transform=deskew(im)
+                    local=Path(root)/"rectified.png";corrected.save(local)
+            else:local.write_bytes(raw)
+            # Serialized predictions: do not instantiate multiple heavyweight models.
+            with _PADDLE_LOCK:
+                pipeline=paddle_pipeline(config)
+                predictions=pipeline.predict(input=str(local))
+            for item in predictions:
                 obj=item.json
                 if callable(obj):obj=obj()
                 if not isinstance(obj,dict):raise ValueError("Unexpected OCR result")
@@ -151,7 +175,7 @@ def extract(path, *, paddle_config=None, use_pymupdf=False, tesseract_psm=6, enh
     if any(not 0<=s<=1 for s in scores):raise ValueError("Invalid OCR confidence")
     return {"source_sha256":digest(raw),"format":kind,"method":method,
             "pages":[{"page":i+1,"text":p} for i,p in enumerate(pages)],
-            "tables":tables,"minimum_ocr_score":min(scores) if scores else None,
+            "tables":tables,"rectification":transform,"minimum_ocr_score":min(scores) if scores else None,
             "status":"UNAPPROVED","warning":"Review against original. OCR score is not financial accuracy."}
 
 

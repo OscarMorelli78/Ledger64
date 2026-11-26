@@ -18,6 +18,7 @@ from procurement_ingest import extract,propose
 from procurement_consensus import compare_image
 from procurement_references import reference_check
 from procurement_table import table_drafts
+from procurement_geometry import extract_grid
 import procurement_queue as queue
 import tenant
 
@@ -39,7 +40,10 @@ def make_router(actor,body,origin,base,slots):
             with tempfile.TemporaryDirectory() as root:
                 file=Path(root)/("document"+suffix);file.write_bytes(raw)
                 strategy=p.get("strategy","standard")
-                if strategy=="consensus":
+                if strategy=="grid":
+                    grid=extract_grid(raw)
+                    r={"status":"UNAPPROVED","source_sha256":grid["source_sha256"],"structured_tables":[grid]}
+                elif strategy=="consensus":
                     proposal=compare_image(file)
                     r={"status":"UNAPPROVED","proposal":proposal}
                 elif strategy=="standard":
