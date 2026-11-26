@@ -6,6 +6,7 @@ on:
       - '.github/workflows/procurement-local-model.yml'
       - 'scripts/benchmark_procurement_fields.py'
       - 'procurement_ingest.py'
+      - 'procurement_semantic_v3.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -15,7 +16,7 @@ jobs:
     timeout-minutes: 20
     env:
       OLLAMA_IMAGE: ollama/ollama@sha256:4e0d5daa6c5cd91e27011977031466844c5ea4ba2393b35e78068835edec040b
-      MODEL: qwen2.5:1.5b-instruct-q4_K_M
+      MODEL: qwen2.5:7b-instruct-q4_K_M
     steps:
       - uses: actions/checkout@v6
         with:
@@ -33,7 +34,7 @@ jobs:
           done
           docker exec ledger64-provision ollama pull "$MODEL"
           docker exec ledger64-provision ollama list | tee "$RUNNER_TEMP/local-model-id.txt"
-          grep -F '65ec06548149' "$RUNNER_TEMP/local-model-id.txt"
+          grep -F '845dbda0ea48' "$RUNNER_TEMP/local-model-id.txt"
           docker rm -f ledger64-provision
       - name: Run semantic extraction with network disabled
         run: |
@@ -48,7 +49,7 @@ jobs:
             sleep 2
           done
           docker exec ledger64-offline ollama list
-          docker run --rm --network container:ledger64-offline --cap-drop ALL --security-opt no-new-privileges --read-only --tmpfs /tmp:rw,noexec,nosuid,size=64m --user "$(id -u):$(id -g)" -e PYTHONDONTWRITEBYTECODE=1 --mount "type=bind,source=$GITHUB_WORKSPACE,target=/src,readonly" --mount "type=bind,source=$RUNNER_TEMP/ledger64-model-report,target=/report" -w /src python:3.13-slim python scripts/benchmark_procurement_fields.py --backend text --model "$MODEL" --semantic-v2 --output /report/semantic-fields.json --gate
+          docker run --rm --network container:ledger64-offline --cap-drop ALL --security-opt no-new-privileges --read-only --tmpfs /tmp:rw,noexec,nosuid,size=64m --user "$(id -u):$(id -g)" -e PYTHONDONTWRITEBYTECODE=1 --mount "type=bind,source=$GITHUB_WORKSPACE,target=/src,readonly" --mount "type=bind,source=$RUNNER_TEMP/ledger64-model-report,target=/report" -w /src python:3.13-slim python scripts/benchmark_procurement_fields.py --backend text --model "$MODEL" --semantic-v3 --output /report/semantic-fields.json --gate
       - name: Preserve report even on accuracy gate failure
         if: always()
         uses: actions/upload-artifact@v6

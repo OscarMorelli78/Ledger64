@@ -19,6 +19,7 @@ from procurement import validate
 from procurement_ingest import extract,propose
 from procurement_consensus import compare_image
 from procurement_semantic_v2 import propose_v2
+from procurement_semantic_v3 import propose_v3
 
 HEAD=("kind","id","supplier","date","currency")
 COMMON=("id","sku","unit","quantity")
@@ -122,7 +123,7 @@ def aggregate(rows):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--backend",choices=("text","tesseract","paddle","consensus"),required=True)
-    p.add_argument("--config",type=Path);p.add_argument("--model");p.add_argument("--semantic-v2",action="store_true")
+    p.add_argument("--config",type=Path);p.add_argument("--model");p.add_argument("--semantic-v2",action="store_true");p.add_argument("--semantic-v3",action="store_true")
     p.add_argument("--output",type=Path);p.add_argument("--gate",action="store_true")
     args=p.parse_args()
     if args.backend=="paddle" and not args.config:p.error("Paddle requires provisioned local configuration")
@@ -141,7 +142,7 @@ def main():
                 else:
                     result=extract(path,paddle_config=args.config if args.backend=="paddle" else None)
                     if args.model:
-                        candidate=(propose_v2 if args.semantic_v2 else propose)(result,args.model)["candidate"]
+                        candidate=(propose_v3 if args.semantic_v3 else propose_v2 if args.semantic_v2 else propose)(result,args.model)["candidate"]
                     else:
                         candidate=strict_candidate("\n".join(x["text"] for x in result["pages"]))
             except (ValueError,TypeError,KeyError,OSError,RuntimeError) as exc:

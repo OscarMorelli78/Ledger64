@@ -18,7 +18,7 @@ jobs:
           python-version: '3.13'
       - run: sudo apt-get update -o Acquire::Retries=3 && sudo apt-get install -y tesseract-ocr tesseract-ocr-eng tesseract-ocr-spa fonts-dejavu-core
       - run: python -m pip install -r requirements-dev.txt
-      - run: python -m unittest -v test_procurement test_procurement_extensions test_procurement_http test_procurement_ocr test_procurement_templates test_procurement_fields test_procurement_consensus test_procurement_references test_procurement_table
+      - run: python -m unittest -v test_procurement test_procurement_extensions test_procurement_http test_procurement_ocr test_procurement_templates test_procurement_fields test_procurement_consensus test_procurement_references test_procurement_table test_procurement_semantic_v3
       - run: python -m procurement_cli --db "$RUNNER_TEMP/ledger64-procurement.sqlite3" demo
       - run: python -m procurement_cli --db "$RUNNER_TEMP/ledger64-procurement.sqlite3" verify
       - run: python scripts/benchmark_procurement_ocr.py --backend tesseract

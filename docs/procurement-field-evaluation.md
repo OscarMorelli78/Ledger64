@@ -54,3 +54,11 @@ Paddle run 45880925169 failed during offline inference because the lazy table
 orientation classifier was not provisioned. The corrected provisioning stage
 warms up the full table pipeline with distinct synthetic values before removing
 network access. Acceptance fixtures remain separate; no customer data is used.
+
+The evidence-per-field v2 model also returned no accepted candidate on nine
+complete documents (run 45881017494). Qwen2.5 1.5B is rejected as the extraction
+candidate. The next experiment uses Qwen2.5 7B Q4_K_M (manifest 845dbda0ea48,
+Apache-2.0 weights per Ollama's model documentation), a compact array schema,
+source-derived row evidence and independent labelled-layout verification.
+The quality gate stays unchanged. This is not a default model or production
+license approval. The larger model increases hardware requirements.
