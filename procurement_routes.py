@@ -20,6 +20,7 @@ from procurement_references import reference_check
 from procurement_table import table_drafts,propose_from_cells
 from procurement_geometry import extract_grid,reread_cells
 import procurement_queue as queue
+import procurement_lifecycle as lifecycle
 import tenant
 
 def make_router(actor,body,origin,base,slots):
@@ -70,6 +71,10 @@ def make_router(actor,body,origin,base,slots):
             return result
         with db(u) as store:
             queue.initialize(store)
+            if route=="revision-submit":
+                return {"id":lifecycle.submit(store,u,p["kind"],p["supplier"],p["doc_id"],p["expected_version"],p["action"],p.get("document"),p["evidence"])}
+            if route=="revision-review":
+                return lifecycle.review(store,u,p["id"],p["decision"],p["evidence"])
             if route=="submit":
                 raw=base64.b64decode(p["source"],validate=True)
                 checks=reference_check(p["candidate"],store.documents(u["company"],True))
@@ -92,6 +97,14 @@ def make_router(actor,body,origin,base,slots):
     def script(req:Request):
         if not actor(req):return error(401,"Sign in")
         return Response((base/"procurement_ui.js").read_bytes(),media_type="application/javascript")
+    @router.get("/procurement/api/revisions")
+    def revisions(req:Request):
+        u=actor(req)
+        if not u:return error(401,"Sign in")
+        try:
+            with db(u) as store:
+                return {"documents":store.revisions(u["company"],True),"requests":lifecycle.list_requests(store,u)}
+        except (ValueError,sqlite3.Error):return error(409,"Cannot verify document history")
     @router.get("/procurement/api/cases")
     def cases(req:Request):
         u=actor(req)
@@ -115,9 +128,9 @@ def make_router(actor,body,origin,base,slots):
         u=await run_in_threadpool(actor,req)
         if not u:return error(401,"Sign in")
         if req.headers.get("origin")!=origin or not hmac.compare_digest(req.headers.get("X-CSRF-Token",""),u["csrf"]):return error(403,"Unauthorized")
-        if route not in ("extract","reread-cells","table-propose","submit","review","report"):return error(404,"Unknown route")
+        if route not in ("extract","reread-cells","table-propose","submit","review","revision-submit","revision-review","report"):return error(404,"Unknown route")
         if route!="report" and u["role"]=="reader":return error(403,"Write permission required")
-        if route=="review" and u["role"]!="owner":return error(403,"Owner permission required")
+        if route in ("review","revision-review") and u["role"]!="owner":return error(403,"Owner permission required")
         if not slots.acquire(blocking=False):return error(503,"Busy")
         try:
             payload=json.loads(await body(req,6_000_000))

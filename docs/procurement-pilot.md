@@ -169,3 +169,9 @@ prevent concurrent stale corrections. Reports recompute current corrected truth;
 `as_of` is an economic document date, not a historical knowledge-time snapshot.
 The chain detects ordinary tampering, not a privileged attacker rewriting the
 whole database and chain. Trusted CLI identities are not authenticated.
+
+The authenticated pilot exposes revision history and a separate two-person
+revision request queue. Analysts/owners propose; a distinct owner approves or
+rejects. Only approved events change the current snapshot. Requests are scoped
+to the company and synthetic class; stale version requests fail closed. Web
+revision history is explicit; original approval cases remain historical records.

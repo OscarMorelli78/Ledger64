@@ -100,4 +100,26 @@ class ProcurementHTTP(unittest.TestCase):
         payload["source_sha256"]="a"*64
         self.assertEqual(self.send(a,"table-propose",payload).status_code,400)
 
+    def test_revision_requires_independent_review_and_updates_report(self):
+        a,b,reader,other=[self.client(n) for n in ("analyst-a","owner-a","reader-a","owner-b")]
+        for doc in (order(),delivery("R","50"),invoice("I","50","600")):
+            key,_=self.submit(a,doc)
+            self.assertEqual(self.send(b,"review",{"id":key,"decision":"APPROVED","evidence":"Independent synthetic original review"}).status_code,200)
+        record=next(x for x in a.get("/procurement/api/revisions").json()["documents"] if x["kind"]=="invoice")
+        payload=dict(kind="invoice",supplier="S",doc_id="I",expected_version=record["versions"][-1]["version"],action="CORRECT",document=invoice("I","50","450"),evidence="Verified transcription error")
+        self.assertEqual(self.send(reader,"revision-submit",payload).status_code,403)
+        self.assertEqual(self.send(other,"revision-submit",payload).status_code,400)
+        r=self.send(a,"revision-submit",payload);self.assertEqual(r.status_code,200,r.text)
+        review=dict(id=r.json()["id"],decision="APPROVED",evidence="Independent synthetic revision evidence")
+        self.assertEqual(self.send(a,"revision-review",review).status_code,403)
+        self.assertEqual(self.send(other,"revision-review",review).status_code,400)
+        self.assertEqual(self.send(b,"revision-review",review).status_code,200)
+        self.assertEqual(self.send(b,"revision-review",review).status_code,403)
+        report=self.send(reader,"report",{"as_of":"2026-01-31","tolerances":{}})
+        self.assertEqual(report.json()["matching"]["potential_exposure_eur"],"0.00")
+        current=a.get("/procurement/api/revisions").json()
+        self.assertEqual(current["requests"][0]["status"],"APPROVED")
+        self.assertEqual(other.get("/procurement/api/revisions").json(),{"documents":[],"requests":[]})
+        self.assertEqual(self.send(a,"revision-submit",payload).status_code,400)
+
 if __name__=="__main__":unittest.main()

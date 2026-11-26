@@ -114,3 +114,44 @@ function renderTables(result){
     });section.append(b);root.append(section);
   }
 }
+
+async function refreshRevisions(){
+  const data=await request('revisions');
+  const docs=$('revision-documents'),requests=$('revision-requests');
+  docs.replaceChildren();requests.replaceChildren();
+  function addText(parent,tag,text){const node=document.createElement(tag);node.textContent=text;parent.append(node);return node}
+  for(const record of data.documents){
+    const box=document.createElement('article'),last=record.versions.at(-1),d=last.document;
+    addText(box,'h3',d.kind+' · '+d.id+' · '+last.status);
+    const details=document.createElement('details');addText(details,'summary','Immutable versions');addText(details,'pre',JSON.stringify(record.versions,null,2));box.append(details);
+    if(last.status==='ACTIVE'){
+      const candidate=document.createElement('textarea');candidate.rows=10;candidate.value=JSON.stringify(d,null,2);candidate.setAttribute('aria-label','Corrected document '+d.id);box.append(candidate);
+      const reason=document.createElement('textarea');reason.rows=2;reason.placeholder='Reason and original-document evidence';box.append(reason);
+      for(const decision of ['CORRECT','REVOKE']){
+        const b=addText(box,'button','Request '+decision);
+        b.onclick=()=>action(b,async()=>{
+          await request('revision-submit',{kind:d.kind,supplier:d.supplier,doc_id:d.id,expected_version:last.version,
+            action:decision,document:decision==='CORRECT'?JSON.parse(candidate.value):null,evidence:reason.value});
+          await refreshRevisions();
+        });
+      }
+    }
+    docs.append(box);
+  }
+  for(const record of data.requests){
+    const box=document.createElement('article');
+    addText(box,'h3',record.action+' · '+record.doc_id+' · '+record.status);
+    const details=document.createElement('details');addText(details,'summary','Request and evidence');addText(details,'pre',JSON.stringify(record,null,2));box.append(details);
+    if(record.status==='PENDING'){
+      const reason=document.createElement('textarea');reason.rows=2;reason.placeholder='Independent revision evidence';box.append(reason);
+      for(const decision of ['APPROVED','REJECTED']){
+        const b=addText(box,'button','Revision '+decision);
+        b.onclick=()=>action(b,async()=>{
+          await request('revision-review',{id:record.id,decision,evidence:reason.value});await refreshRevisions();
+        });
+      }
+    }
+    requests.append(box);
+  }
+}
+$('refresh-revisions').onclick=()=>action($('refresh-revisions'),refreshRevisions);
