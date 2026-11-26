@@ -33,3 +33,10 @@ No automatic scheduling, retention deletion, encryption or remote storage in thi
 increment. Maximum snapshot size 512 MiB and bounded SQLite backup operation.
 Production requires backup of authentication and core stores, OS ACL review,
 encryption and key recovery, recovery drills on target hardware and documented RPO/RTO.
+
+CI also runs a CLI disaster-recovery drill with the original synthetic database
+moved out of its usual location, verified backup and new-path restoration, and
+asserts the recovered EUR 150 documentary exposure and no confirmed paid loss.
+The original is retained in the temporary runner for safety. Tests separately
+exercise actual deletion of a temporary fixture, WAL consistency, revoked sources,
+CSV and table templates and pending review requests. No real data is involved.

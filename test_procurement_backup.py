@@ -6,6 +6,8 @@ from procurement_backup import create_backup,verify_backup,restore_backup,file_h
 from procurement_queue import initialize,submit,review,list_cases
 import procurement_lifecycle as lifecycle
 from procurement_templates import register,fields,apply
+import procurement_table_templates as tables
+from procurement_table import propose_from_cells
 from test_procurement import order,delivery,invoice
 
 class Recovery(unittest.TestCase):
@@ -109,6 +111,35 @@ class Recovery(unittest.TestCase):
         with sqlite3.connect(self.backup) as c:
             c.execute("UPDATE procurement_docs SET original=? WHERE kind='invoice'",(b"tamper",))
         with self.assertRaises(ValueError):verify_backup(self.backup,"A",file_hash(self.backup))
+    def test_table_template_and_revoked_original_recover(self):
+        with Store(self.db) as s:
+            d=order()
+            metadata={k:v for k,v in d.items() if k!="lines"}
+            headers=list(d["lines"][0])
+            table={"page":1,"status":"REVIEW_REQUIRED","cells":[headers,[d["lines"][0][k] for k in headers]]}
+            source=digest(canonical(d).encode())
+            key=tables.register(s,"A",True,table,metadata,{k:k for k in headers},source,"analyst","owner","Independent mapping review")
+            current=next(x for x in s.revisions("A",True) if x["kind"]=="invoice")["versions"][-1]
+            k=lifecycle.submit(s,self.a,"invoice","S","I",current["version"],"REVOKE",None,"Synthetic invoice withdrawn")
+            lifecycle.review(s,self.b,k,"APPROVED","Independent revocation verified")
+            history=s.revisions("A",True)
+        m=self.create();dest=self.root/"recovered.sqlite3"
+        restore_backup(self.backup,dest,"A",m["sha256"])
+        with Store(dest) as s:
+            self.assertEqual(s.revisions("A",True),history)
+            self.assertIsNone(historical_report(s,"A",True,"2026-01-31")["invoice_audit"])
+            self.assertEqual(s.original_source("A",True,current["source_sha256"]),canonical(invoice("I","50","600")).encode())
+            self.assertEqual(tables.apply(s,"A",True,key,table,dict(metadata,id="O2"),"b"*64)["candidate"]["id"],"O2")
+    def test_pending_revision_survives_without_application(self):
+        with Store(self.db) as s:
+            current=next(x for x in s.revisions("A",True) if x["kind"]=="invoice")["versions"][-1]
+            key=lifecycle.submit(s,self.a,"invoice","S","I",current["version"],"REVOKE",None,"Synthetic pending revocation")
+        m=self.create();dest=self.root/"recovered.sqlite3"
+        restore_backup(self.backup,dest,"A",m["sha256"])
+        with Store(dest) as s:
+            self.assertEqual(len(s.documents("A",True)),3)
+            lifecycle.review(s,self.b,key,"APPROVED","Recovered independent owner review")
+            self.assertEqual(len(s.documents("A",True)),2)
     def test_wrong_expected_hash_and_tenant(self):
         m=self.create()
         with self.assertRaises(ValueError):verify_backup(self.backup,"A","a"*64)

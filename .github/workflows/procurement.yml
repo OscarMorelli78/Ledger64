@@ -21,6 +21,21 @@ jobs:
       - run: python -m unittest -v test_procurement test_procurement_extensions test_procurement_http test_procurement_ocr test_procurement_templates test_procurement_fields test_procurement_consensus test_procurement_references test_procurement_table test_procurement_semantic_v3 test_procurement_geometry test_procurement_table_templates test_procurement_revisions test_procurement_backup
       - run: python -m procurement_cli --db "$RUNNER_TEMP/ledger64-procurement.sqlite3" demo
       - run: python -m procurement_cli --db "$RUNNER_TEMP/ledger64-procurement.sqlite3" verify
+      - name: Disaster recovery CLI drill
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -m 700 "$RUNNER_TEMP/ledger64-recovery"
+          base="$RUNNER_TEMP/ledger64-recovery"
+          python -m procurement_backup create --source "$RUNNER_TEMP/ledger64-procurement.sqlite3" --destination "$base/backup.sqlite3" --tenant demo > "$base/manifest.json"
+          cat "$base/manifest.json"
+          sha=$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["sha256"])' "$base/manifest.json")
+          python -m procurement_backup verify --source "$base/backup.sqlite3" --tenant demo --sha256 "$sha"
+          mv "$RUNNER_TEMP/ledger64-procurement.sqlite3" "$base/simulated-unavailable.sqlite3"
+          python -m procurement_backup restore --source "$base/backup.sqlite3" --destination "$base/recovered.sqlite3" --tenant demo --sha256 "$sha"
+          python -m procurement_cli --db "$base/recovered.sqlite3" verify
+          python -m procurement_cli --db "$base/recovered.sqlite3" match --tenant demo --as-of 2026-01-31 > "$base/recovered-report.json"
+          python -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["potential_exposure_eur"]=="150.00" and d["confirmed_loss_eur"] is None; print("PASS: recovered financial report EUR 150, no confirmed loss")' "$base/recovered-report.json"
       - run: python scripts/benchmark_procurement_ocr.py --backend tesseract
       - run: python scripts/benchmark_procurement_fields.py --backend text --gate
       - run: python scripts/benchmark_procurement_fields.py --backend tesseract --output "$RUNNER_TEMP/procurement-fields.json"
