@@ -16,10 +16,11 @@ jobs:
       group: container-acceptance
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
         with:
-          node-version: "22"
+          node-version: "24"
+          package-manager-cache: false
       - run: node scripts/test_contact.cjs
       - run: docker version
       - run: docker compose version
@@ -30,7 +31,7 @@ jobs:
         run: |
           sudo install -d -o 10001 -g 10001 -m 755 corpus-output
           docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,nodev,size=128m --cap-drop ALL --security-opt no-new-privileges --memory 1g --pids-limit 128 -v "$PWD/corpus.py:/app/corpus.py:ro" -v "$PWD/corpus-output:/output" --entrypoint python ledger64:ci /app/corpus.py /output
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: corpus-results
           retention-days: 1
