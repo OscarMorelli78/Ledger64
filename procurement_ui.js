@@ -48,29 +48,52 @@ function renderTables(result){
       for(const [j,value] of row.entries()){
         const td=document.createElement(i===0?'th':'td'),input=document.createElement('input');
         input.value=value;input.setAttribute('aria-label','Row '+(i+1)+' column '+(j+1));input.maxLength=2000;
-        input.oninput=()=>{$('candidate').value='';};
+        input.oninput=()=>invalidate();
         td.append(input);tr.append(td);cells.push(input);
       }
       inputs.push(cells);table.append(tr);
     }
-    const scroll=document.createElement('div');scroll.style.overflowX='auto';scroll.append(table);section.append(scroll);
-    const metadata={};
+    const scroll=document.createElement('div');scroll.className='scroll';scroll.append(table);section.append(scroll);
+    const metadata={};let revision=0;
+    function invalidate(){revision++;$('candidate').value='';}
     for(const [key,label] of [['kind','Kind (order / receipt / invoice)'],['id','Document ID'],['supplier','Supplier'],['date','Date YYYY-MM-DD'],['currency','Currency EUR']]){
       const l=document.createElement('label'),input=document.createElement('input');l.textContent=label+' ';input.maxLength=160;
       if(key==='currency')input.value='EUR';
-      input.oninput=()=>{$('candidate').value='';};l.append(input);section.append(l);metadata[key]=input;
+      input.oninput=()=>invalidate();l.append(input);section.append(l);metadata[key]=input;
     }
-    const l=document.createElement('label'),mapping=document.createElement('textarea');l.textContent='Exact column mapping JSON (canonical fields → reviewed headers)';
-    mapping.rows=4;mapping.placeholder='{"id":"Line","sku":"SKU","unit":"Unit","quantity":"Qty", ...}';
-    mapping.oninput=()=>{$('candidate').value='';};l.append(mapping);section.append(l);
+    const mappingBox=document.createElement('div');section.append(mappingBox);
+    let mapping={};
+    const extra={order:['unit_price','discount_pct'],receipt:['order_id','order_line'],invoice:['order_id','order_line','net_total']};
+    function rebuildMapping(){
+      mappingBox.replaceChildren();mapping={};
+      const h=document.createElement('h4');h.textContent='Map reviewed columns';mappingBox.append(h);
+      const kind=metadata.kind.value;
+      if(!Object.hasOwn(extra,kind))return;
+      for(const field of ['id','sku','unit','quantity',...extra[kind]]){
+        const label=document.createElement('label'),select=document.createElement('select');
+        label.textContent=field+' ';select.setAttribute('aria-label','Column for '+field);
+        const empty=document.createElement('option');empty.value='';empty.textContent='Select header';select.append(empty);
+        inputs[0].forEach((input,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=input.value;select.append(option)});
+        select.onchange=()=>invalidate();mapping[field]=select;label.append(select);mappingBox.append(label);
+      }
+    }
+    metadata.kind.oninput=()=>{invalidate();rebuildMapping()};
+    inputs[0].forEach(input=>{input.oninput=()=>{invalidate();rebuildMapping()}});
+    rebuildMapping();
     const b=document.createElement('button');b.textContent='Build unapproved proposal';
     b.onclick=()=>action(b,async()=>{
       $('candidate').value='';$('source').disabled=true;
       try{
         const cells=inputs.map(row=>row.map(input=>input.value));
         const meta=Object.fromEntries(Object.entries(metadata).map(([k,input])=>[k,input.value]));
+        const current=revision;
+        const chosen=Object.fromEntries(Object.entries(mapping).map(([field,select])=>{
+          if(select.value==='')throw Error('Choose a column for '+field);
+          return [field,cells[0][Number(select.value)]];
+        }));
         const r=await request('table-propose',{...await source(),source_sha256:result.source_sha256,
-          table:{page:draft.page,status:'REVIEW_REQUIRED',cells},metadata:meta,mapping:JSON.parse(mapping.value)});
+          table:{page:draft.page,status:'REVIEW_REQUIRED',cells},metadata:meta,mapping:chosen});
+        if(current!==revision)throw Error('Table changed; rebuild the proposal');
         $('candidate').value=JSON.stringify(r.candidate,null,2);
         $('extraction').textContent=JSON.stringify(r,null,2);
       }finally{$('source').disabled=false}
