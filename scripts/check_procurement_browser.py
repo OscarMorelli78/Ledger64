@@ -1,8 +1,8 @@
 """Actual browser and HTTP smoke test of opt-in document review (synthetic only)."""
-import json,os,socket,subprocess,sys,tempfile,time
+import json,os,socket,subprocess,sys,tempfile,time,re
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1]
 def fixture(path):
     im=Image.new("RGB",(1500,1000),"white");d=ImageDraw.Draw(im);font=ImageFont.truetype("DejaVuSansMono.ttf",32)
@@ -43,7 +43,7 @@ def main():
                 page.locator("#extract").click()
                 page.get_by_role("button",name="Build unapproved proposal").wait_for(timeout=60_000)
                 # Independent manual review may correct any OCR transcription.
-                values=[["Line","SKU","Unit","Qty","Price","Discount"],["1","P123","ud","20","12.50","5"]]
+                values=[["Line","SKU","Unit","Qty","Price","Discount"],["1","P123","ud","20","12.75","5"]]
                 for i,row in enumerate(values,1):
                     for j,v in enumerate(row,1):page.get_by_label(f"Row {i} column {j}",exact=True).fill(v)
                 for label,v in [("Kind (order / receipt / invoice)","order"),("Document ID","O1"),("Supplier","Synthetic"),("Date YYYY-MM-DD","2026-01-01"),("Currency EUR","EUR")]:
@@ -51,13 +51,14 @@ def main():
                 for i,field in enumerate(("id","sku","unit","quantity","unit_price","discount_pct")):
                     page.get_by_label("Column for "+field,exact=True).select_option(str(i))
                 page.get_by_role("button",name="Build unapproved proposal").click()
-                page.wait_for_function("document.getElementById('candidate').value.includes('12.50')")
+                expect(page.locator("#candidate")).to_have_value(re.compile(r"12\.75"))
                 candidate=json.loads(page.locator("#candidate").input_value())
-                assert candidate["lines"][0]["unit_price"]=="12.50"
-                page.get_by_label("Row 2 column 5",exact=True).fill("12.75")
+                assert candidate["lines"][0]["unit_price"]=="12.75"
+                page.get_by_label("Row 2 column 5",exact=True).fill("12.50")
                 assert not page.locator("#candidate").input_value()
                 page.get_by_role("button",name="Build unapproved proposal").click()
-                page.wait_for_function("document.getElementById('candidate').value.includes('12.75')")
+                expect(page.locator("#candidate")).to_have_value(re.compile(r"12\.50"))
+                assert json.loads(page.locator("#candidate").input_value())["lines"][0]["unit_price"]=="12.50"
                 page.locator("#evidence").fill("Synthetic operator reviewed source")
                 page.locator("#submit").click()
                 page.get_by_text("order · O1 · PENDING",exact=True).wait_for()
