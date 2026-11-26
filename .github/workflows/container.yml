@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 20
     concurrency:
       group: container-acceptance
-      cancel-in-progress: false
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,9 +28,7 @@ jobs:
       - run: bash smoke_container.sh ledger64:ci
       - name: 10000 invoices in Docker Engine
         run: |
-          mkdir -p corpus-output
-          sudo chown 10001:10001 corpus-output
-          chmod 755 corpus-output
+          sudo install -d -o 10001 -g 10001 -m 755 corpus-output
           docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,nodev,size=128m --cap-drop ALL --security-opt no-new-privileges --memory 1g --pids-limit 128 -v "$PWD/corpus.py:/app/corpus.py:ro" -v "$PWD/corpus-output:/output" --entrypoint python ledger64:ci /app/corpus.py /output
       - uses: actions/upload-artifact@v4
         with:
