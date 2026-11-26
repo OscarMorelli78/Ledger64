@@ -22,8 +22,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
+      - uses: actions/checkout@v6
+      - uses: actions/configure-pages@v6
       - name: Generate SEO metadata for the live project URL
         run: python scripts/site_metadata.py https://oscarmorelli78.github.io/Ledger64/
       - name: Stage public project documentation only
@@ -89,12 +89,12 @@ jobs:
           Path('_indexnow_changes.json').write_text(json.dumps(changed), encoding='utf-8')
           print(f'New or changed pages: {len(changed)}')
           PY
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _pages
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
       - name: Notify IndexNow after successful deployment
         continue-on-error: true
         run: |
