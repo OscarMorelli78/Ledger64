@@ -1,0 +1,55 @@
+name: Container acceptance
+on:
+  workflow_dispatch:
+  push:
+    branches: [Main, main]
+    paths: ["Dockerfile", "compose.yaml", "secure_app.py", "engine.py", "requirements*.txt", "corpus.py", "smoke_container.sh"]
+  pull_request:
+    branches: [Main, main]
+    paths: ["Dockerfile", "compose.yaml", "secure_app.py", "engine.py", "requirements*.txt", "corpus.py", "smoke_container.sh"]
+permissions:
+  contents: read
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: container-acceptance
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require full release source
+        run: test -f Dockerfile && test -f secure_app.py && test -f corpus.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node scripts/test_contact.cjs
+      - run: docker version
+      - run: docker compose version
+      - run: BC_DOMAIN=ledger64.example.invalid docker compose config --quiet
+      - run: docker build --pull -t ledger64:ci .
+      - run: bash smoke_container.sh ledger64:ci
+      - name: 10000 synthetic invoices in Docker Engine
+        run: |
+          mkdir -p corpus-output
+          sudo chown 10001:10001 corpus-output
+          chmod 755 corpus-output
+          docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,nodev,size=128m --cap-drop ALL --security-opt no-new-privileges --memory 1g --pids-limit 128 -v "$PWD/corpus.py:/app/corpus.py:ro" -v "$PWD/corpus-output:/output" --entrypoint python ledger64:ci /app/corpus.py /output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corpus-results
+          retention-days: 1
+          path: corpus-output/results.json
+      - run: docker save ledger64:ci -o image.tar
+      - run: docker image rm ledger64:ci && docker load -i image.tar
+      - run: bash smoke_container.sh ledger64:ci
+      - name: Inspect image and verify non-root runtime
+        run: |
+          docker image inspect ledger64:ci --format '{{.Id}} {{.Config.User}}'
+          test "$(docker image inspect ledger64:ci --format '{{.Config.User}}')" = 10001
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ledger64:ci
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
