@@ -25,3 +25,16 @@ Install advanced models separately under their reviewed licences, pre-provision 
 model directories, disable network egress at the OS/container level, then execute the
 optional commands. Ollama must be local and have no cloud inference. This benchmark
 does not provision models or prove offline isolation. No customer data, no payments.
+
+## Isolated real semantic-model experiment
+
+The dedicated Procurement isolated semantic benchmark workflow provisions the official
+Ollama 0.40.18 linux/amd64 image pinned to its manifest digest and the Qwen2.5
+1.5B Q4_K_M public model (expected manifest ID prefix 65ec06548149). No documents
+are processed during provisioning. The provision container is removed. Inference
+runs in a network-none container; the Python client shares only that isolated
+network namespace and communicates over loopback. A read-only source mount and a
+separate report directory are used. The quality gate is not bypassed if the model
+fails. The experiment evaluates semantic extraction from text, not PaddleOCR or
+real invoices, and does not approve any financial record. Model selection remains
+conditional on measured results and licensing review.

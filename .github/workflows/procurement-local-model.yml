@@ -1,0 +1,63 @@
+name: Procurement isolated semantic benchmark
+on:
+  push:
+    branches: [feat/adaptive-procurement-v1]
+    paths:
+      - '.github/workflows/procurement-local-model.yml'
+      - 'scripts/benchmark_procurement_fields.py'
+      - 'procurement_ingest.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OLLAMA_IMAGE: ollama/ollama@sha256:4e0d5daa6c5cd91e27011977031466844c5ea4ba2393b35e78068835edec040b
+      MODEL: qwen2.5:1.5b-instruct-q4_K_M
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Provision public model weights (no documents)
+        run: |
+          set -euo pipefail
+          docker pull "$OLLAMA_IMAGE"
+          docker pull python:3.13-slim
+          docker volume create ledger64-model
+          docker run -d --name ledger64-provision --cap-drop ALL -e OLLAMA_HOST=127.0.0.1:11434 -e OLLAMA_NO_CLOUD=1 -v ledger64-model:/root/.ollama "$OLLAMA_IMAGE"
+          for i in $(seq 1 60); do
+            if docker exec ledger64-provision ollama list >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          docker exec ledger64-provision ollama pull "$MODEL"
+          docker exec ledger64-provision ollama list | tee "$RUNNER_TEMP/local-model-id.txt"
+          grep -F '65ec06548149' "$RUNNER_TEMP/local-model-id.txt"
+          docker rm -f ledger64-provision
+      - name: Run semantic extraction with network disabled
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ledger64-model-report"
+          cp "$RUNNER_TEMP/local-model-id.txt" "$RUNNER_TEMP/ledger64-model-report/"
+          docker image inspect "$OLLAMA_IMAGE" python:3.13-slim --format '{{.Id}} {{json .RepoDigests}}' > "$RUNNER_TEMP/ledger64-model-report/images.txt"
+          docker run -d --name ledger64-offline --network none --cap-drop ALL --security-opt no-new-privileges -e OLLAMA_HOST=127.0.0.1:11434 -e OLLAMA_NO_CLOUD=1 -e OLLAMA_NUM_PARALLEL=1 -e OLLAMA_MAX_LOADED_MODELS=1 -v ledger64-model:/root/.ollama "$OLLAMA_IMAGE"
+          test "$(docker inspect -f '{{.HostConfig.NetworkMode}}' ledger64-offline)" = none
+          for i in $(seq 1 60); do
+            if docker exec ledger64-offline ollama list >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          docker exec ledger64-offline ollama list
+          docker run --rm --network container:ledger64-offline --cap-drop ALL --security-opt no-new-privileges --read-only --tmpfs /tmp:rw,noexec,nosuid,size=64m --user "$(id -u):$(id -g)" -e PYTHONDONTWRITEBYTECODE=1 --mount "type=bind,source=$GITHUB_WORKSPACE,target=/src,readonly" --mount "type=bind,source=$RUNNER_TEMP/ledger64-model-report,target=/report" -w /src python:3.13-slim python scripts/benchmark_procurement_fields.py --backend text --model "$MODEL" --output /report/semantic-fields.json --gate
+      - name: Preserve report even on accuracy gate failure
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: isolated-semantic-benchmark
+          path: ${{ runner.temp }}/ledger64-model-report/
+          if-no-files-found: warn
+      - name: Cleanup model containers
+        if: always()
+        run: |
+          docker rm -f ledger64-provision ledger64-offline || true
+          docker volume rm ledger64-model || true
