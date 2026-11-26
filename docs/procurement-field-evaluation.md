@@ -81,3 +81,11 @@ layouts (0, +2, -3 degrees, extra row and alternate headings), all exact cells,
 mean <10 s, sampled process-tree RSS <4,000,000 KiB. RSS is approximate and sums
 shared pages. Results apply only to these ruled-table layouts. Unsupported layouts
 abstain; PDF deskew, perspective and borderless tables remain separate gates.
+
+The image-matching acceptance uses five additional synthetic purchase documents
+(two products, partial receipts and multiple invoices). Operator-supplied metadata
+and explicit column labels are held constant; OCR must reproduce every line field.
+Only exact fixture candidates are approved by a simulated independent reviewer.
+The original images and normalized records are retained, and the financial engine
+must reproduce EUR 150 documented exposure, no confirmed paid loss, and valid
+integrity. This is not a test of automatic header metadata extraction.
