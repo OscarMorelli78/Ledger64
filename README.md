@@ -2,76 +2,113 @@
 
 **Learn from every invoice. Make every decision count.**
 
-Open-source invoice auditing, purchase cost comparison and financial governance for small businesses. C64-inspired interface; local processing without external AI.
+A local-first, open-source purchasing intelligence and invoice auditing tool for small and medium-sized businesses. A C64-inspired interface meets deterministic financial calculations, traceable evidence and human oversight.
 
-[English](README.en.md) · [Español](README.es.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Deutsch](README.de.md) · [Português (Brasil)](README.pt-BR.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [हिन्दी](README.hi.md)
+[![MIT license](https://img.shields.io/badge/license-MIT-8df2ca)](LICENSE) [![Python](https://img.shields.io/badge/python-3.13-3776ab)](https://www.python.org/) [![Languages](https://img.shields.io/badge/languages-9-7468c8)](#documentation) [![Container acceptance](https://github.com/OscarMorelli78/Ledger64/actions/workflows/container.yml/badge.svg?branch=Main)](https://github.com/OscarMorelli78/Ledger64/actions/workflows/container.yml) [![International acceptance](https://github.com/OscarMorelli78/Ledger64/actions/workflows/international.yml/badge.svg?branch=Main)](https://github.com/OscarMorelli78/Ledger64/actions/workflows/international.yml)
 
-**Stable source distribution v0.1.0:** [download and checksums](https://github.com/OscarMorelli78/Ledger64/releases/tag/v0.1.0) · [verified CI acceptance](https://github.com/OscarMorelli78/Ledger64/actions/runs/45844526093) · [international project website](https://oscarmorelli78.github.io/Ledger64/).
+**[Try the browser demo](https://oscarmorelli78.github.io/Ledger64/demo/) · [Latest release](https://github.com/OscarMorelli78/Ledger64/releases/latest) · [Project website](https://oscarmorelli78.github.io/Ledger64/) · [Report an issue](https://github.com/OscarMorelli78/Ledger64/issues)**
 
-**Use synthetic data only until deployment-specific security, privacy and real-data validation pass.** Not accounting or tax certification. EUR purchases only; no credit notes. ALE is experimental and offline. CI is not independent production certification.
+> Synthetic data only until deployment-specific security, privacy and real-document validation pass. No accounting or tax certification; EUR purchases excluding VAT; no credit notes or payment execution.
 
-## Try Ledger64 in your browser
+## See Ledger64 in action
 
-**[TRY LIVE DEMO — English / Español](https://oscarmorelli78.github.io/Ledger64/demo/)** — No installation, no account, synthetic data only. This standalone JavaScript demonstration illustrates invoice checks, price comparisons and estimated savings; it does not run the original Python engine or certify financial results.
+Real C64 interface captures are produced by the authenticated Chromium acceptance test using a fictitious tenant and the included synthetic invoices. The v0.1.1 release workflow publishes the screenshots only after its acceptance gates pass.
 
-## Experimental Procurement Intelligence
+![Ledger64 C64 interface, English, synthetic invoices](https://github.com/OscarMorelli78/Ledger64/releases/download/v0.1.1/ledger64-c64-en.png)
 
-The public pilot is separate from the stable v0.1.0 release: local reviewed OCR, cumulative three-way matching, supplier memory, document revision and verified recovery. Synthetic data only. 108 tests passed at f9fd4a66; no production authorization. [Try the nine-language procurement simulation](https://oscarmorelli78.github.io/Ledger64/demo/procurement.html) (illustration only, not the Python engine). [Experimental branch](https://github.com/OscarMorelli78/Ledger64/tree/feat/adaptive-procurement-v1) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI evidence](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410).
+![Ledger64 C64 executive dashboard, synthetic invoices](https://github.com/OscarMorelli78/Ledger64/releases/download/v0.1.1/ledger64-dashboard-en.png)
 
-[English](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/en.md) · [Español](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/es.md) · [Français](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/fr.md) · [Italiano](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/it.md) · [Deutsch](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/de.md) · [Português (Brasil)](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/pt-BR.md) · [简体中文](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/zh-CN.md) · [日本語](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/ja.md) · [हिन्दी](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/hi.md)
+[Spanish screenshot](https://github.com/OscarMorelli78/Ledger64/releases/download/v0.1.1/ledger64-c64-es.png) · [Browser acceptance workflow](https://github.com/OscarMorelli78/Ledger64/actions/workflows/international.yml)
 
-## Quick start
+## What it does for SMEs
 
-Install Python 3.13, Node.js for regression tests, Tesseract with English and Spanish models for OCR, Pango and Noto fonts for PDF. Create a virtual environment and install the pinned dependencies. On Windows use PowerShell activation and `$env:` variables. Set a private data directory; never expose the legacy `app.py`.
+| Use case | Business value |
+|---|---|
+| Retail and wholesalers | Flag possible duplicate invoice lines and arithmetic discrepancies before payment review. |
+| Hospitality | Compare identical ingredients or supplies in common units across suppliers; estimate potential savings. |
+| Manufacturing and services | Detect unit-price increases of at least 10% and investigate purchasing conditions. |
+| Finance and purchasing teams | Record evidence, approved product aliases, review decisions and draft reports with separation of duties. |
+
+Estimated savings and flagged amounts are not confirmed paid losses or guarantees. Validate quality, delivery, minimum orders and commercial terms before changing suppliers.
+
+## Quick start — local Docker
+
+Prerequisite: Docker Engine or Docker Desktop with Compose v2. Clone or extract the source into a private directory and run from its root:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements-dev.txt
-export BC_ROOT="$PWD/data" BC_TLS=0 BC_HOSTS=127.0.0.1 BC_ORIGIN=http://127.0.0.1:8765
-python admin.py company Demo
-# COMPANY_ID = returned identifier
-python admin.py user COMPANY_ID demo-owner --role owner
-python admin.py user COMPANY_ID demo-analyst --role analyst
-python -m uvicorn secure_app:app --host 127.0.0.1 --port 8765
+docker compose -f compose.local.yaml up --build -d
 ```
-```powershell
-.venv\Scripts\Activate.ps1
-$env:BC_ROOT = "$PWD\data"
-$env:BC_TLS = "0"
-$env:BC_HOSTS = "127.0.0.1"
-$env:BC_ORIGIN = "http://127.0.0.1:8765"
-```
-http://127.0.0.1:8765/login
 
+This starts the authenticated service at **http://127.0.0.1:8765/login** with a persistent named volume, no public proxy, and no default accounts. Create your own company and users (the CLI prompts for passwords of at least 14 characters):
+
+```bash
+docker compose -f compose.local.yaml exec app python admin.py company Demo
+# Replace COMPANY_ID with the returned ID.
+docker compose -f compose.local.yaml exec app python admin.py user COMPANY_ID demo-owner --role owner
+docker compose -f compose.local.yaml exec app python admin.py user COMPANY_ID demo-analyst --role analyst
+```
+
+Sign in, select your language and click **Load demo**. Stop without deleting the data volume:
+
+```bash
+docker compose -f compose.local.yaml down
+```
+
+Local HTTP is for a trusted workstation only. Do not bind to a public interface. For native Python 3.13 installation (Windows, macOS, Linux), [read the installation manual](docs/manual/en.md#1-installation). For HTTPS container deployment, see [RELEASE.md](RELEASE.md); real data remains out of scope.
+
+## Architecture at a glance
+
+```mermaid
+flowchart LR
+    A["CSV / XLSX / supported PDF"] --> B["Local ingestion"]
+    O["Scanned PDF / local OCR"] --> R["Human review / normalized CSV"]
+    R --> B
+    B --> C["Deterministic MIT engine"]
+    C --> V["Independent verification"]
+    V --> D["Draft audit / supplier comparison"]
+    D --> G["Governance / separate reviewer"]
+    G --> S["Local SQLite / evidence"]
+    D --> E["JSON / CSV / PDF"]
+    L["Offline experimental ALE"] -. supervised observations .-> S
+```
+
+The stable engine uses decimal arithmetic and explicit rules. No external AI API or autonomous payment. The independent verification, approvals and local audit trail are distinct from accounting certification.
+
+## Features and boundaries
+
+- Structured CSV UTF-8, single-sheet XLSX without macros or formulas, supported digital PDF; scanned PDF OCR is a draft for review (English/Spanish models).
+- Up to 2 MB per document, 10,000 rows, 2–20 batch files / 8 MB total; positive quantities, common EUR net units, no general-purpose invoice extraction guarantee.
+- Arithmetic checks, duplicate detection, recent supplier comparisons and estimated savings; comparisons exclude invalid or conflicting lines and use recent observations within 30 days.
+- Authenticated company isolation, roles, evidence, approval workflows, local reports and PDF export.
+- ALE remains a separate supervised offline experimental learner; it does not automatically learn from production uploads or modify financial rules.
+
+## Experimental Procurement Intelligence — separate branch
+
+The opt-in pilot adds cumulative order/receipt/invoice matching, partial deliveries, multiple invoices, configurable tolerances, contract discounts, reviewed OCR, supplier layout memory, revisions and verified SQLite recovery. **108/108 tests passed at f9fd4a66**; five-image acceptance was 4/5 first-pass and 5/5 after simulated review. This is not part of the stable runtime or approved for production.
+
+[Try the nine-language matching simulation](https://oscarmorelli78.github.io/Ledger64/demo/procurement.html) — static illustration, not the Python engine. [Experimental source](https://github.com/OscarMorelli78/Ledger64/tree/feat/adaptive-procurement-v1) · [Draft PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI evidence](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410).
 
 ## Documentation
 
-[English — Documentation](docs/manual/en.md) · [MIT](LICENSE) · [SECURITY](SECURITY.md)
+Nine interface and manual languages. OCR recognition models are English/Spanish, not nine-language OCR. Technical identifiers and source evidence remain unchanged.
 
-### Input format
+| Language | Stable manual | Experimental manual |
+|---|---|---|
+| English | [README](README.en.md) · [Manual](docs/manual/en.md) | [Pilot](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/en.md) |
+| Español | [README](README.es.md) · [Manual](docs/manual/es.md) | [Pilot](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/es.md) |
+| Français | [README](README.fr.md) · [Manual](docs/manual/fr.md) | [Pilot](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/fr.md) |
+| Italiano | [README](README.it.md) · [Manual](docs/manual/it.md) | [Pilot](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/it.md) |
+| Deutsch | [README](README.de.md) · [Manual](docs/manual/de.md) | [Pilot](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/de.md) |
+| Português (Brasil) | [README](README.pt-BR.md) · [Manual](docs/manual/pt-BR.md) | [Pilot](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/pt-BR.md) |
+| 简体中文 | [README](README.zh-CN.md) · [Manual](docs/manual/zh-CN.md) | [Pilot](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/zh-CN.md) |
+| 日本語 | [README](README.ja.md) · [Manual](docs/manual/ja.md) | [Pilot](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/ja.md) |
+| हिन्दी | [README](README.hi.md) · [Manual](docs/manual/hi.md) | [Pilot](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/hi.md) |
 
-Use the synthetic demo first. The standard template has eleven fields, listed below; dates use ISO YYYY-MM-DD, units kg, l, ud (g and ml are normalized), prices are EUR excluding VAT. Use positive quantities, net plus shipping minus discount. CSV UTF-8, one XLSX sheet without formulas/macros/external links, or supported structured PDF. Up to 2 MB per file, 10,000 lines; batches 2–20 files and 8 MB total. No generic invoice or tax form import is promised.
+[Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md) · [Deployment](RELEASE.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
-### Audit and comparisons
+## Privacy and contribution
 
-Run Audit file. Inspect arithmetic discrepancies, potential duplicates and price increases of at least 10%. Repeated conflicting IDs and inconsistent amounts are excluded from comparison. Compare identical products in the same unit and the most recent observations within 30 days. Potential savings are estimates, not paid or realized savings. Monthly totals include eligible rows only.
+Keep business data, credentials, backups and private model parameters out of GitHub. Back up authentication and company databases separately; restore into a new scope. Local hash chains have no external integrity anchor. CI is not a production security certification. Original code is MIT; dependencies retain their respective licenses.
 
-### Governance
+[Contributing](CONTRIBUTING.md) · [Support](SUPPORT.md) · [Commercial services](COMMERCIAL.md) · [Contact](CONTACT.md) · [Developer portfolio](https://github.com/OscarMorelli78?tab=repositories)
 
-Propose equivalent product codes or declared savings with evidence and distinct baseline/purchase references. A second owner approves or rejects requests; self-approval is prohibited. Ordinary reports are drafts. Request release for real (not synthetic) reports with successful arithmetic checks and independent reviewer. Approved release is JSON only. Keep the local audit chain and review evidence.
-
-### Adaptive learning
-
-ALE is a separate supervised offline module. Run unit tests and synthetic stress commands below. It stores observations and candidates in SQLite, requires independent review and segregates tenants and real/synthetic observations. It does not automatically train from uploaded production invoices or change financial rules; do not deploy it as an autonomous decision engine.
-
-### Privacy and backups
-
-MIT applies to original code; dependencies retain licenses. Never commit personal identifiers, business documents, credentials, backups, private model parameters or logs. Back up authentication and company databases separately, restore to a new tenant and restrict access. Audit chains are local, not externally anchored. Report vulnerabilities privately to the maintainer.
-
-
-## Community & professional services
-
-[Explore the developer's public GitHub portfolio](https://github.com/OscarMorelli78?tab=repositories) · [AI and business automation portfolio](https://github.com/OscarMorelli78/ConsultorIA)
-
-[Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)

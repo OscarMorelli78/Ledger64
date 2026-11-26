@@ -1,0 +1,27 @@
+# Trusted workstation only. No public proxy, TLS or default accounts.
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      BC_ROOT: /data
+      BC_TLS: '0'
+      BC_HOSTS: '127.0.0.1'
+      BC_ORIGIN: 'http://127.0.0.1:8765'
+    ports: ['127.0.0.1:8765:8765']
+    volumes:
+      - local_data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=128m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 1g
+    pids_limit: 128
+    healthcheck:
+      test: ['CMD','python','-c','import urllib.request; urllib.request.urlopen("http://127.0.0.1:8765/login",timeout=3)']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  local_data: {}

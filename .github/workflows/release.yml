@@ -14,23 +14,38 @@ jobs:
     uses: ./.github/workflows/container.yml
   international:
     uses: ./.github/workflows/international.yml
+    with:
+      release_screenshots: true
   learning:
     uses: ./.github/workflows/learning.yml
-  publish:
-    needs: [container, international, learning]
-    if: github.ref == 'refs/heads/Main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: write
+  local-compose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - name: Publish tested source and checksums
+      - run: bash scripts/smoke_local_compose.sh
+  publish:
+    needs: [container, international, learning, local-compose]
+    if: github.ref == 'refs/heads/Main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        with:
+          name: release-c64-screenshots
+          path: /tmp/ledger64-screenshots
+      - name: Publish tested source, screenshots and checksums
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: v0.1.0
+          VERSION: v0.1.1
         run: |
           set -euo pipefail
           if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
@@ -44,14 +59,12 @@ jobs:
           find . -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/ledger64-assets/SHA256SUMS
           cp /tmp/ledger64-assets/SHA256SUMS .
           sha256sum -c SHA256SUMS
-          tar -czf /tmp/ledger64-assets/Ledger64-v0.1.0.tar.gz .
+          tar -czf "/tmp/ledger64-assets/Ledger64-$VERSION.tar.gz" .
+          for name in ledger64-c64-en.png ledger64-c64-es.png ledger64-dashboard-en.png; do
+            test -s "/tmp/ledger64-screenshots/$name"
+            cp "/tmp/ledger64-screenshots/$name" /tmp/ledger64-assets/
+          done
           cd /tmp/ledger64-assets
-          sha256sum Ledger64-v0.1.0.tar.gz > Ledger64-v0.1.0.tar.gz.sha256
-          cat > notes.md <<'EOF'
-          First stable source distribution of Ledger64 (MIT).
-          - Nine languages, C64 interface, invoice auditing and governance.
-          - Docker, OCR, PDF, browser, synthetic corpus and ALE acceptance passed.
-          - HIGH/CRITICAL vulnerability gate passed for the app and Compose proxy at release time.
-          - This is not a production security certification. Synthetic data only until deployment-specific validation, independent review and privacy controls are complete. ALE remains experimental and offline. No confidential documents are included.
-          EOF
-          gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Ledger64 v0.1.0" --notes-file notes.md --latest Ledger64-v0.1.0.tar.gz Ledger64-v0.1.0.tar.gz.sha256 SHA256SUMS
+          sha256sum "Ledger64-$VERSION.tar.gz" > "Ledger64-$VERSION.tar.gz.sha256"
+          sha256sum "Ledger64-$VERSION.tar.gz" ledger64-*.png > ASSET-SHA256SUMS
+          gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Ledger64 $VERSION — International showcase & local quick start" --notes-file "$GITHUB_WORKSPACE/docs/releases/v0.1.1.md" --latest "Ledger64-$VERSION.tar.gz" "Ledger64-$VERSION.tar.gz.sha256" SHA256SUMS ASSET-SHA256SUMS ledger64-*.png

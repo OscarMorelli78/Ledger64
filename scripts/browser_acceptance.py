@@ -30,6 +30,11 @@ def main():
     for lang in ('en',*[l for l in LANGS if l!='en']):
      page.locator('#ledger_language').select_option(lang);expect(page.locator('html')).to_have_attribute('lang',lang);expect(page.locator('#run')).to_have_text(tr('Analizar archivo',lang));expect(page.locator('#alias_supplier')).to_have_attribute('placeholder',tr('Proveedor',lang));expect(page.locator('#gov_release')).to_have_text(tr('Solicitar liberación',lang))
      page.locator('#demo').click();expect(page.locator('#status')).to_have_text(tr('Auditoría completada y guardada localmente.',lang),timeout=15000);expect(page.locator('#rows')).to_have_text('6');expect(page.locator('#alerts')).to_have_text('3');expect(page.locator('#alerttable th').first).to_have_text(tr('Alerta',lang));expect(page.locator('#kind')).to_have_text(tr('DATOS SINTÉTICOS',lang))
+     if os.environ.get('LEDGER_RELEASE_SCREENSHOTS') and lang in ('en','es'):
+      output=Path(os.environ['LEDGER_RELEASE_SCREENSHOTS']);output.mkdir(parents=True,exist_ok=True)
+      page.locator('header').scroll_into_view_if_needed()
+      page.screenshot(path=str(output/('ledger64-c64-'+lang+'.png')),animations='disabled')
+      if lang=='en':page.locator('#result').screenshot(path=str(output/'ledger64-dashboard-en.png'),animations='disabled')
      href=page.locator('#exports a').last.get_attribute('href');pdf=context.request.get(url+href);assert pdf.ok and pdf.body().startswith(b'%PDF-'),lang
      page.reload(wait_until='domcontentloaded');expect(page.locator('html')).to_have_attribute('lang',lang)
      page.locator('#run').click();expect(page.locator('#status')).to_have_text(tr('Selecciona un archivo.',lang));assert not errors,errors

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 — International showcase and local quick start
+- Revamped README with authentic C64 screenshots, architecture and SME use cases.
+- Added loopback-only Docker Compose launcher and release-specific smoke/persistence checks.
+- Nine-language stable documentation and links to experimental pilot; runtime financial core unchanged.
+- Release gated by container, browser, learning and local Compose acceptance. Synthetic data only.
+
 ## 0.1.0 — stable distribution candidate
 - Alpine runtime, Devanagari fonts, writable temporary font cache, updated dependencies and Node 24-based CI actions.
 - Traefik replaces Caddy as the default proxy; no Docker socket, bounded requests, TLS routing checks and independent image scan.
