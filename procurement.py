@@ -122,7 +122,7 @@ class Store:
         CREATE TABLE IF NOT EXISTS procurement_docs(
           tenant TEXT NOT NULL, synthetic INTEGER NOT NULL, kind TEXT NOT NULL,
           supplier_key TEXT NOT NULL, doc_key TEXT NOT NULL, body TEXT NOT NULL,
-          source_hash TEXT NOT NULL, body_hash TEXT NOT NULL, proposer TEXT NOT NULL,
+          source_hash TEXT NOT NULL, body_hash TEXT NOT NULL, original BLOB NOT NULL, proposer TEXT NOT NULL,
           reviewer TEXT NOT NULL, evidence TEXT NOT NULL,
           PRIMARY KEY(tenant,synthetic,kind,supplier_key,doc_key),
           UNIQUE(tenant,synthetic,source_hash));
@@ -163,9 +163,9 @@ class Store:
                 return False
             prev = h
         actual = set()
-        for row in self.db.execute("SELECT tenant,synthetic,kind,supplier_key,doc_key,body,source_hash,body_hash,proposer,reviewer,evidence FROM procurement_docs"):
-            tenant, synthetic, kind, supplier, key, body, source, h, proposer, reviewer, evidence = row
-            if digest(body.encode()) != h:
+        for row in self.db.execute("SELECT tenant,synthetic,kind,supplier_key,doc_key,body,source_hash,body_hash,original,proposer,reviewer,evidence FROM procurement_docs"):
+            tenant, synthetic, kind, supplier, key, body, source, h, original, proposer, reviewer, evidence = row
+            if digest(body.encode()) != h or digest(original) != source:
                 return False
             actual.add((tenant, synthetic, kind, supplier, key, source, h, proposer, reviewer, evidence))
         return actual == expected
@@ -191,8 +191,8 @@ class Store:
             self.db.execute("BEGIN IMMEDIATE")
             if not self.verify():
                 raise ValueError("Ledger integrity failure")
-            self.db.execute("INSERT INTO procurement_docs VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-                            (*key, body, source, h, proposer, reviewer, evidence))
+            self.db.execute("INSERT INTO procurement_docs VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                            (*key, body, source, h, original, proposer, reviewer, evidence))
             last = self.db.execute("SELECT hash FROM procurement_events ORDER BY seq DESC LIMIT 1").fetchone()
             prev = last[0] if last else "0" * 64
             self.db.execute("INSERT INTO procurement_events(body,prev,hash) VALUES(?,?,?)",
@@ -300,14 +300,18 @@ def reconcile(documents, as_of, tolerances=None):
             difference = money(actual - expected)
             exposure = None
             if receipts and invoices and not invalid:
-                threshold = p["amount"] + money(expected * p["price_pct"] / 100)
-                exposure = max(ZERO, difference) if difference > threshold and (
-                    quantity_gap > p["quantity"] or high or difference > threshold) else ZERO
+                billed_contract = money(billed * price)
+                net_price_gap = money(actual - billed_contract)
+                threshold = p["amount"] + money(billed_contract * p["price_pct"] / 100)
+                quantity_exposure = max(ZERO, billed_contract - expected) if quantity_gap > p["quantity"] else ZERO
+                price_exposure = max(ZERO, net_price_gap) if net_price_gap > threshold else ZERO
+                # Cap at net documentary excess, avoiding duplicate or offset amounts.
+                exposure = min(max(ZERO, difference), quantity_exposure + price_exposure)
                 total += exposure
             result.append({"order": order_ref, "sku": order["sku"], "unit": order["unit"],
                            "ordered": str(ordered), "received": str(received), "billed": str(billed),
                            "matched": str(matched), "quantity_gap": str(quantity_gap),
-                           "contract_unit_net": str(price), "billed_net_eur": str(money(actual)),
+                           "contract_unit_net": str(price), "billed_net_eur": str(money(actual)), "gross_documentary_difference_eur": str(difference) if receipts and invoices and not invalid else None,
                            "expected_net_eur": str(expected) if receipts and invoices and not invalid else None,
                            "potential_exposure_eur": str(money(exposure)) if exposure is not None else None,
                            "alerts": alerts, "price_alert_lines": high,
