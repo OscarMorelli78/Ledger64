@@ -26,7 +26,7 @@ jobs:
       - uses: actions/configure-pages@v6
       - name: Generate SEO metadata for the live project URL
         run: python scripts/site_metadata.py https://oscarmorelli78.github.io/Ledger64/
-      - name: Stage public project documentation only
+      - name: Stage public project documentation and synthetic demo
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -39,6 +39,8 @@ jobs:
               text = source.read_text(encoding='utf-8')
               text = re.sub(r'<a\b[^>]*href="contact\.html"[^>]*>.*?</a>', '<a href="https://github.com/OscarMorelli78/Ledger64">GitHub</a>', text, flags=re.I|re.S)
               text = text.replace('</main>', '<p><a href="https://github.com/OscarMorelli78/Ledger64">Source code / MIT</a> | <a href="https://github.com/sponsors/OscarMorelli78">Support open-source development</a></p></main>')
+              label = 'PROBAR DEMO INTERACTIVA' if name == 'es' else 'TRY LIVE DEMO'
+              text = text.replace('</h1>', f'</h1><p><strong><a href="demo/">{label}</a></strong> (EN / ES, synthetic data only)</p>', 1)
               (target / source.name).write_text(text, encoding='utf-8')
           for name in ('style.css', 'robots.txt', 'sitemap.xml'):
               shutil.copyfile(Path('site') / name, target / name)
@@ -56,6 +58,10 @@ jobs:
           (target / '.nojekyll').touch()
           assert len(list(target.glob('*.html'))) == 9
           assert not any('contact.html' in p.read_text(encoding='utf-8') for p in target.glob('*.html'))
+          # Explicitly allowlist the standalone browser demo; never publish the application backend.
+          (target / 'demo').mkdir()
+          shutil.copyfile(Path('site/demo/index.html'), target / 'demo/index.html')
+          assert (target / 'demo/index.html').is_file()
           # Google Search Console ownership verification (public file).
           (target / 'googledaf0135fdcc28f06.html').write_text('google-site-verification: googledaf0135fdcc28f06.html\n', encoding='utf-8')
           # Public IndexNow ownership file, scoped to this project path.
@@ -86,6 +92,9 @@ jobs:
               url = base if name == 'index' else base + file.name
               if initial or read_live(url) != file.read_bytes():
                   changed.append({'url': url, 'file': file.name})
+          demo = target / 'demo/index.html'
+          if initial or read_live(base + 'demo/') != demo.read_bytes():
+              changed.append({'url': base + 'demo/', 'file': 'demo/index.html'})
           Path('_indexnow_changes.json').write_text(json.dumps(changed), encoding='utf-8')
           print(f'New or changed pages: {len(changed)}')
           PY
