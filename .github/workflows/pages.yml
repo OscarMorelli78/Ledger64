@@ -58,6 +58,36 @@ jobs:
           assert not any('contact.html' in p.read_text(encoding='utf-8') for p in target.glob('*.html'))
           # Google Search Console ownership verification (public file).
           (target / 'googledaf0135fdcc28f06.html').write_text('google-site-verification: googledaf0135fdcc28f06.html\n', encoding='utf-8')
+          # Public IndexNow ownership file, scoped to this project path.
+          (target / '5e49ee73b2be4d4fbebd52d6578186c6.txt').write_text('5e49ee73b2be4d4fbebd52d6578186c6', encoding='utf-8')
+          PY
+      - name: Identify new or changed public URLs
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, urllib.request, urllib.error
+          base = 'https://oscarmorelli78.github.io/Ledger64/'
+          key = '5e49ee73b2be4d4fbebd52d6578186c6'
+          target = Path('_pages')
+          def read_live(url):
+              try:
+                  request = urllib.request.Request(url, headers={'Cache-Control': 'no-cache', 'User-Agent': 'Ledger64-Pages-CI/1.0'})
+                  with urllib.request.urlopen(request, timeout=10) as response:
+                      return response.read()
+              except urllib.error.HTTPError as error:
+                  if error.code == 404:
+                      return None
+                  raise
+          initial = read_live(base + key + '.txt') != key.encode()
+          changed = []
+          for name in ('index','es','fr','it','de','pt-BR','zh-CN','ja','hi'):
+              file = target / (name + '.html')
+              url = base if name == 'index' else base + file.name
+              if initial or read_live(url) != file.read_bytes():
+                  changed.append({'url': url, 'file': file.name})
+          Path('_indexnow_changes.json').write_text(json.dumps(changed), encoding='utf-8')
+          print(f'New or changed pages: {len(changed)}')
           PY
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -65,3 +95,40 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Notify IndexNow after successful deployment
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, time, urllib.request, urllib.error
+          base = 'https://oscarmorelli78.github.io/Ledger64/'
+          key = '5e49ee73b2be4d4fbebd52d6578186c6'
+          key_url = base + key + '.txt'
+          manifest = Path('_indexnow_changes.json')
+          if not manifest.exists():
+              raise SystemExit('Change detection unavailable; no URLs submitted.')
+          changed = json.loads(manifest.read_text(encoding='utf-8'))
+          if not changed:
+              print('No changed HTML pages; skipping IndexNow.')
+              raise SystemExit(0)
+          def live(url):
+              req = urllib.request.Request(url, headers={'Cache-Control': 'no-cache', 'User-Agent': 'Ledger64-Pages-CI/1.0'})
+              with urllib.request.urlopen(req, timeout=10) as response:
+                  return response.read()
+          for attempt in range(5):
+              try:
+                  if live(key_url).strip() == key.encode() and all(live(item['url']) == (Path('_pages') / item['file']).read_bytes() for item in changed):
+                      break
+              except (OSError, urllib.error.URLError):
+                  pass
+              if attempt < 4:
+                  time.sleep(8)
+          else:
+              raise SystemExit('Published content not yet verified; no URLs submitted.')
+          payload = {'host':'oscarmorelli78.github.io','key':key,'keyLocation':key_url,'urlList':[item['url'] for item in changed]}
+          req = urllib.request.Request('https://api.indexnow.org/indexnow', data=json.dumps(payload).encode('utf-8'), headers={'Content-Type':'application/json; charset=utf-8','User-Agent':'Ledger64-Pages-CI/1.0'}, method='POST')
+          with urllib.request.urlopen(req, timeout=30) as response:
+              if response.status not in (200, 202):
+                  raise SystemExit(f'Unexpected IndexNow response: {response.status}')
+              print(f'IndexNow HTTP {response.status}: {len(changed)} URLs received; indexing is not guaranteed.')
+          PY
