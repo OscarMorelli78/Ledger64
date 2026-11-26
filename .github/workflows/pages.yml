@@ -56,6 +56,8 @@ jobs:
           (target / '.nojekyll').touch()
           assert len(list(target.glob('*.html'))) == 9
           assert not any('contact.html' in p.read_text(encoding='utf-8') for p in target.glob('*.html'))
+          # Google Search Console ownership verification (public file).
+          (target / 'googledaf0135fdcc28f06.html').write_text('google-site-verification: googledaf0135fdcc28f06.html\n', encoding='utf-8')
           PY
       - uses: actions/upload-pages-artifact@v3
         with:
