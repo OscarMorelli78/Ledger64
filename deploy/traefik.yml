@@ -1,0 +1,28 @@
+http:
+  routers:
+    ledger64:
+      rule: 'Host(`{{ env "BC_DOMAIN" }}`)'
+      entryPoints: [websecure]
+      service: ledger64
+      middlewares: [request-limit]
+      tls:
+        certResolver: letsencrypt
+        options: default
+  services:
+    ledger64:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://app:8765
+  middlewares:
+    request-limit:
+      buffering:
+        maxRequestBodyBytes: 13000000
+        memRequestBodyBytes: 1048576
+        maxResponseBodyBytes: 32000000
+        memResponseBodyBytes: 1048576
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      sniStrict: false

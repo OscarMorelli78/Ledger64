@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [Main, main]
-    paths: ["Dockerfile", "compose.yaml", "Caddyfile", "requirements*.txt", "**/*.py", "**/*.js", "**/*.cjs", "**/*.html", "locales/**", "smoke_container.sh", ".github/workflows/**"]
+    paths: ["Dockerfile", "compose.yaml", "Caddyfile", "deploy/**", "scripts/smoke_proxy.sh", "requirements*.txt", "**/*.py", "**/*.js", "**/*.cjs", "**/*.html", "locales/**", "smoke_container.sh", ".github/workflows/**"]
   pull_request:
     branches: [Main, main]
 permissions:
@@ -58,5 +58,7 @@ jobs:
           cache: 'false'
       - name: Scan the Compose reverse proxy as well
         run: |
-          docker pull caddy:2-alpine
-          trivy image --scanners vuln --severity HIGH,CRITICAL --exit-code 1 caddy:2-alpine
+          docker pull traefik:v3.8.0
+          trivy image --scanners vuln --severity HIGH,CRITICAL --exit-code 1 traefik:v3.8.0
+      - name: Test Compose HTTPS routing and request limits
+        run: bash scripts/smoke_proxy.sh
