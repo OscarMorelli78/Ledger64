@@ -1,0 +1,136 @@
+language,keyword,status
+es,auditoría de facturas,PROPOSED
+es,inteligencia financiera,PROPOSED
+es,optimización de costes,PROPOSED
+es,control de gastos,PROPOSED
+es,comparador de proveedores,PROPOSED
+es,auditoría automatizada,PROPOSED
+es,software empresarial gratuito,PROPOSED
+es,software de código abierto,PROPOSED
+es,detección de anomalías financieras,PROPOSED
+es,inteligencia documental,PROPOSED
+es,aprendizaje adaptativo,PROPOSED
+es,automatización contable,PROPOSED
+es,gestión financiera para pymes,PROPOSED
+es,rentabilidad empresarial,PROPOSED
+es,detección de facturas duplicadas,PROPOSED
+fr,audit des factures,PROPOSED
+fr,intelligence financière,PROPOSED
+fr,optimisation des coûts,PROPOSED
+fr,contrôle des dépenses,PROPOSED
+fr,comparateur de fournisseurs,PROPOSED
+fr,audit automatisé,PROPOSED
+fr,logiciel de gestion gratuit,PROPOSED
+fr,logiciel open source,PROPOSED
+fr,détection des anomalies financières,PROPOSED
+fr,intelligence documentaire,PROPOSED
+fr,apprentissage adaptatif,PROPOSED
+fr,automatisation comptable,PROPOSED
+fr,gestion financière des PME,PROPOSED
+fr,rentabilité des entreprises,PROPOSED
+fr,détection des factures en double,PROPOSED
+it,revisione delle fatture,PROPOSED
+it,intelligence finanziaria,PROPOSED
+it,ottimizzazione dei costi,PROPOSED
+it,controllo delle spese,PROPOSED
+it,comparatore di fornitori,PROPOSED
+it,revisione automatizzata,PROPOSED
+it,software gestionale gratuito,PROPOSED
+it,software open source,PROPOSED
+it,rilevamento delle anomalie finanziarie,PROPOSED
+it,intelligenza documentale,PROPOSED
+it,apprendimento adattivo,PROPOSED
+it,automazione contabile,PROPOSED
+it,gestione finanziaria per PMI,PROPOSED
+it,redditività aziendale,PROPOSED
+it,rilevamento delle fatture duplicate,PROPOSED
+en,open source invoice audit,PROPOSED
+en,financial intelligence,PROPOSED
+en,cost optimization,PROPOSED
+en,expense control,PROPOSED
+en,supplier price comparison,PROPOSED
+en,automated audit,PROPOSED
+en,free business software,PROPOSED
+en,open source software,PROPOSED
+en,financial anomaly detection,PROPOSED
+en,document intelligence,PROPOSED
+en,adaptive learning,PROPOSED
+en,accounting automation,PROPOSED
+en,SME financial management,PROPOSED
+en,business profitability,PROPOSED
+en,duplicate invoice detection,PROPOSED
+de,Rechnungsprüfung Open Source,PROPOSED
+de,Finanzintelligenz,PROPOSED
+de,Kostenoptimierung,PROPOSED
+de,Ausgabenkontrolle,PROPOSED
+de,Lieferantenpreisvergleich,PROPOSED
+de,automatisierte Prüfung,PROPOSED
+de,kostenlose Unternehmenssoftware,PROPOSED
+de,Open Source Software,PROPOSED
+de,finanzielle Anomalieerkennung,PROPOSED
+de,Dokumentenintelligenz,PROPOSED
+de,adaptives Lernen,PROPOSED
+de,Buchhaltungsautomatisierung,PROPOSED
+de,Finanzmanagement für KMU,PROPOSED
+de,Unternehmensrentabilität,PROPOSED
+de,doppelte Rechnungen erkennen,PROPOSED
+pt-BR,auditoria de faturas,PROPOSED
+pt-BR,inteligência financeira,PROPOSED
+pt-BR,otimização de custos,PROPOSED
+pt-BR,controle de despesas,PROPOSED
+pt-BR,comparação de fornecedores,PROPOSED
+pt-BR,auditoria automatizada,PROPOSED
+pt-BR,software empresarial gratuito,PROPOSED
+pt-BR,software de código aberto,PROPOSED
+pt-BR,detecção de anomalias financeiras,PROPOSED
+pt-BR,inteligência documental,PROPOSED
+pt-BR,aprendizado adaptativo,PROPOSED
+pt-BR,automação contábil,PROPOSED
+pt-BR,gestão financeira para PMEs,PROPOSED
+pt-BR,rentabilidade empresarial,PROPOSED
+pt-BR,detecção de faturas duplicadas,PROPOSED
+zh-CN,开源发票审核,PROPOSED
+zh-CN,财务智能,PROPOSED
+zh-CN,成本优化,PROPOSED
+zh-CN,费用控制,PROPOSED
+zh-CN,供应商价格比较,PROPOSED
+zh-CN,自动化审计,PROPOSED
+zh-CN,免费企业软件,PROPOSED
+zh-CN,开源软件,PROPOSED
+zh-CN,财务异常检测,PROPOSED
+zh-CN,文档智能,PROPOSED
+zh-CN,自适应学习,PROPOSED
+zh-CN,会计自动化,PROPOSED
+zh-CN,中小企业财务管理,PROPOSED
+zh-CN,企业盈利能力,PROPOSED
+zh-CN,重复发票检测,PROPOSED
+ja,オープンソース請求書監査,PROPOSED
+ja,財務インテリジェンス,PROPOSED
+ja,コスト最適化,PROPOSED
+ja,経費管理,PROPOSED
+ja,仕入先価格比較,PROPOSED
+ja,監査自動化,PROPOSED
+ja,無料業務ソフト,PROPOSED
+ja,オープンソースソフトウェア,PROPOSED
+ja,財務異常検知,PROPOSED
+ja,文書インテリジェンス,PROPOSED
+ja,適応学習,PROPOSED
+ja,会計自動化,PROPOSED
+ja,中小企業財務管理,PROPOSED
+ja,企業収益性,PROPOSED
+ja,重複請求書検出,PROPOSED
+hi,ओपन सोर्स इनवॉइस ऑडिट,PROPOSED
+hi,वित्तीय बुद्धिमत्ता,PROPOSED
+hi,लागत अनुकूलन,PROPOSED
+hi,खर्च नियंत्रण,PROPOSED
+hi,आपूर्तिकर्ता मूल्य तुलना,PROPOSED
+hi,स्वचालित ऑडिट,PROPOSED
+hi,मुफ्त व्यावसायिक सॉफ्टवेयर,PROPOSED
+hi,ओपन सोर्स सॉफ्टवेयर,PROPOSED
+hi,वित्तीय विसंगति पहचान,PROPOSED
+hi,दस्तावेज़ बुद्धिमत्ता,PROPOSED
+hi,अनुकूली अधिगम,PROPOSED
+hi,लेखांकन स्वचालन,PROPOSED
+hi,छोटे व्यवसाय वित्तीय प्रबंधन,PROPOSED
+hi,व्यावसायिक लाभप्रदता,PROPOSED
+hi,डुप्लिकेट इनवॉइस पहचान,PROPOSED

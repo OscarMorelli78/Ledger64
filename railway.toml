@@ -1,0 +1,9 @@
+# Candidate configuration. Set BC_HOSTS and BC_ORIGIN to the actual HTTPS domain.
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+[deploy]
+healthcheckPath = "/login"
+healthcheckTimeout = 60
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

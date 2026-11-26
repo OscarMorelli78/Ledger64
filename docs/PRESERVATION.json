@@ -1,0 +1,23 @@
+{
+  "baseline": "previous four-language distribution",
+  "unchanged_core_and_fixtures": {
+    "engine.py": "b10ec3dda2ac1a6bc68b1fba883a97ba2b57236bfeb22c32110ba34af20ba1db",
+    "ingest.py": "c22b6524aae6434e79881fa188e24ec0d2280461fad2d41d7a4abf152a2ff5d7",
+    "flexible.py": "907313965d3154d61457c7b2ebaab1320c91cf62bf6c34f0162180318ddfbd4d",
+    "independent.py": "74c009cb986a93e3e9cc86a70e1e790047b9e83db72fdc8c5eb53428eb703201",
+    "governance.py": "053d521a74c1578bc7851c9f149479981cca30dc6851898d3538bc05d902e5cc",
+    "intelligence.py": "7d99523702c1afdd6806f8efd5d7e7ec7ddaa3bd6b8bdeb564d44598763bffcc",
+    "decisions.py": "a7609c41ca4a69437e0499561abcea98334616ec7242ddb9cea4ddecd3cde2bf",
+    "tenant.py": "9c916bdfa3523a2d36ecea14f75eecee6905d978a0abeb507a907977491f268d",
+    "ocr_review.py": "e22a397bb9f38d7aa7de42ce44de8a12ebc0605e5cba07838c843e08ddbba2a5",
+    "admin.py": "f83e916741e64fdc1a895e6b727518183cd7ddb53aa1e29a3f5d7d481f2d2bf0",
+    "adaptive_learning/engine.py": "2a6ae409ae6adabc6a9110daf02b742d072be881d998f782904d6bcefd78cfeb",
+    "adaptive_learning/stress.py": "3b2e3f71e37d7a00c83772858664375039e913071813ff1769ed2d228aadb88b",
+    "adaptive_learning/test_learning.py": "c871b54131588948bc6e384ae7a8430157e73d6f248bae8e08cba2cb39319814",
+    "corpus.py": "37f2d97e75415df4c37dc3582bdb47b05c9e0313aea0ee6b907dbbda6e05f875",
+    "demo.csv": "0e100a21011c9257aed3617082583be3d8d888ac81ff47e825eaaec73146df78",
+    "demo.pdf": "a39ce79e9062fa5693053d1008799b44237e6e3fa4db3d6e5d561fb91d8eb32f",
+    "demo.xlsx": "37802dc121f36df008371c6a82a65e6402242f69a57f3bb13bbbbf524fa793fb",
+    "demo_scan.pdf": "892a140a4c43c77a8be0c18c898571759fbf731209a235c966588894fff639de"
+  }
+}

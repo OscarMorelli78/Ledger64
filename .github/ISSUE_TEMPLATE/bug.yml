@@ -1,0 +1,13 @@
+name: Incidencia reproducible
+description: Reportar un fallo con datos sintéticos
+body:
+  - type: textarea
+    attributes:
+      label: Reproducción, versión y resultado esperado
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Resultado observado (sin secretos ni datos reales)
+    validations:
+      required: true

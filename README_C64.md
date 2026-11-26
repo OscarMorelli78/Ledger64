@@ -1,0 +1,2 @@
+# C64-inspired interface
+The original blue/violet palette and retro presentation are preserved. English is the default, and the selector persists any of nine supported languages. System Noto-compatible fallback fonts support Chinese, Japanese and Hindi. HTTP and DOM regression tests passed; real browser navigation was blocked by the test environment policy. Run the international CI before production.

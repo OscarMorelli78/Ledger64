@@ -1,0 +1,2 @@
+# Docker acceptance kit
+Candidate only. CI builds, runs hardened smoke tests, saves/reloads image and runs vulnerability scanning. No production credentials. Synthetic test volume removed on exit. HTTP is restricted to loopback for tests; production requires HTTPS and explicit BC_ORIGIN/BC_HOSTS, encrypted storage, backups, and further testing. Copy to a dedicated repository to execute the workflow. Workflow has not run on GitHub. Existing offline image is separate from the Dockerfile build.

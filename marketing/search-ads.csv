@@ -1,0 +1,140 @@
+campaign,ad_group,keyword,headline,description,status
+Ledger64,Invoice audit,open source invoice audit,Open Source Invoice Audit,Review invoice totals and evidence with Ledger64. Experimental MIT release.,PAUSED
+Ledger64,Cost control,supplier price comparison,Compare Supplier Costs,Explore comparable purchases and approval workflows. Self-hosted software.,PAUSED
+Ledger64,Governance,financial governance software,Financial Review Tools,Track evidence and independent approval. Explore the open source project.,PAUSED
+Ledger64 ES,Auditoria,auditoria facturas codigo abierto,Auditoria de Facturas,Compara compras y revisa importes. Proyecto experimental de codigo abierto.,PAUSED
+Ledger64 ES,Document review,auditoría de facturas,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,inteligencia financiera,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,optimización de costes,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,control de gastos,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,comparador de proveedores,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,auditoría automatizada,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,software empresarial gratuito,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,software de código abierto,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,detección de anomalías financieras,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,inteligencia documental,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,aprendizaje adaptativo,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,automatización contable,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,gestión financiera para pymes,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,rentabilidad empresarial,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 ES,Document review,detección de facturas duplicadas,Auditoría de facturas,Compara costes y revisa facturas. Software experimental con licencia MIT.,PAUSED
+Ledger64 FR,Document review,audit des factures,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,intelligence financière,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,optimisation des coûts,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,contrôle des dépenses,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,comparateur de fournisseurs,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,audit automatisé,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,logiciel de gestion gratuit,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,logiciel open source,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,détection des anomalies financières,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,intelligence documentaire,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,apprentissage adaptatif,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,automatisation comptable,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,gestion financière des PME,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,rentabilité des entreprises,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 FR,Document review,détection des factures en double,Audit des factures,Comparez les coûts et vérifiez les factures. Logiciel expérimental MIT.,PAUSED
+Ledger64 IT,Document review,revisione delle fatture,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,intelligence finanziaria,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,ottimizzazione dei costi,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,controllo delle spese,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,comparatore di fornitori,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,revisione automatizzata,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,software gestionale gratuito,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,software open source,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,rilevamento delle anomalie finanziarie,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,intelligenza documentale,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,apprendimento adattivo,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,automazione contabile,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,gestione finanziaria per PMI,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,redditività aziendale,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 IT,Document review,rilevamento delle fatture duplicate,Controllo delle fatture,Confronta costi e verifica fatture. Software sperimentale con licenza MIT.,PAUSED
+Ledger64 en,Document review,open source invoice audit,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,financial intelligence,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,cost optimization,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,expense control,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,supplier price comparison,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,automated audit,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,free business software,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,open source software,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,financial anomaly detection,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,document intelligence,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,adaptive learning,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,accounting automation,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,SME financial management,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,business profitability,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 en,Document review,duplicate invoice detection,Open source invoice audit,Review costs and invoices. Experimental MIT software.,PAUSED
+Ledger64 de,Document review,Rechnungsprüfung Open Source,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,Finanzintelligenz,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,Kostenoptimierung,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,Ausgabenkontrolle,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,Lieferantenpreisvergleich,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,automatisierte Prüfung,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,kostenlose Unternehmenssoftware,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,Open Source Software,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,finanzielle Anomalieerkennung,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,Dokumentenintelligenz,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,adaptives Lernen,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,Buchhaltungsautomatisierung,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,Finanzmanagement für KMU,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,Unternehmensrentabilität,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 de,Document review,doppelte Rechnungen erkennen,Rechnungsprüfung Open Source,Kosten und Rechnungen prüfen. Experimentelle MIT-Software.,PAUSED
+Ledger64 pt-BR,Document review,auditoria de faturas,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,inteligência financeira,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,otimização de custos,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,controle de despesas,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,comparação de fornecedores,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,auditoria automatizada,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,software empresarial gratuito,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,software de código aberto,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,detecção de anomalias financeiras,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,inteligência documental,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,aprendizado adaptativo,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,automação contábil,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,gestão financeira para PMEs,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,rentabilidade empresarial,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 pt-BR,Document review,detecção de faturas duplicadas,Auditoria de faturas,Revise custos e faturas. Software experimental MIT.,PAUSED
+Ledger64 zh-CN,Document review,开源发票审核,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,财务智能,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,成本优化,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,费用控制,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,供应商价格比较,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,自动化审计,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,免费企业软件,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,开源软件,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,财务异常检测,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,文档智能,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,自适应学习,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,会计自动化,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,中小企业财务管理,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,企业盈利能力,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 zh-CN,Document review,重复发票检测,开源发票审核,核对采购成本与发票。MIT 许可实验软件。,PAUSED
+Ledger64 ja,Document review,オープンソース請求書監査,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,財務インテリジェンス,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,コスト最適化,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,経費管理,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,仕入先価格比較,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,監査自動化,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,無料業務ソフト,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,オープンソースソフトウェア,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,財務異常検知,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,文書インテリジェンス,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,適応学習,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,会計自動化,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,中小企業財務管理,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,企業収益性,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 ja,Document review,重複請求書検出,請求書監査オープンソース,購買コストと請求書を確認。MIT実験ソフト。,PAUSED
+Ledger64 hi,Document review,ओपन सोर्स इनवॉइस ऑडिट,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,वित्तीय बुद्धिमत्ता,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,लागत अनुकूलन,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,खर्च नियंत्रण,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,आपूर्तिकर्ता मूल्य तुलना,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,स्वचालित ऑडिट,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,मुफ्त व्यावसायिक सॉफ्टवेयर,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,ओपन सोर्स सॉफ्टवेयर,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,वित्तीय विसंगति पहचान,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,दस्तावेज़ बुद्धिमत्ता,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,अनुकूली अधिगम,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,लेखांकन स्वचालन,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,छोटे व्यवसाय वित्तीय प्रबंधन,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,व्यावसायिक लाभप्रदता,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED
+Ledger64 hi,Document review,डुप्लिकेट इनवॉइस पहचान,ओपन सोर्स इनवॉइस ऑडिट,लागत और इनवॉइस की समीक्षा। प्रयोगात्मक MIT सॉफ्टवेयर।,PAUSED

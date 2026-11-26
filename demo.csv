@@ -1,0 +1,7 @@
+supplier,invoice,line,date,product,unit,quantity,net_eur,shipping_eur,discount_eur,reported_total_eur
+Proveedor A,A001,1,2026-11-01,CAFE-001,kg,10,100,0,0,100
+Proveedor A,A002,1,2026-11-20,CAFE-001,kg,10,120,0,0,120
+Proveedor A,A002,1,2026-11-20,CAFE-001,kg,10,120,0,0,120
+Proveedor B,B001,1,2026-11-21,CAFE-001,g,10000,90,0,0,90
+Proveedor A,A003,1,2026-11-20,ACEITE-001,l,20,100,0,0,105
+Proveedor C,C001,1,2026-11-21,ACEITE-001,l,20,80,0,0,80

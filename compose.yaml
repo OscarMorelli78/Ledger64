@@ -1,0 +1,46 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      BC_ROOT: /data
+      BC_TLS: '1'
+      BC_HOSTS: '${BC_DOMAIN:?Set BC_DOMAIN}'
+      BC_ORIGIN: 'https://${BC_DOMAIN}'
+    volumes:
+      - business_data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=128m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 1g
+    pids_limit: 128
+    networks: [backend]
+    healthcheck:
+      test: ['CMD','python','-c','import os,urllib.request; urllib.request.urlopen(urllib.request.Request("http://127.0.0.1:8765/login",headers={"Host":os.environ["BC_HOSTS"]}),timeout=3)']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      BC_DOMAIN: '${BC_DOMAIN:?Set BC_DOMAIN}'
+    ports: ['80:80','443:443']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [backend, edge]
+    depends_on:
+      app:
+        condition: service_healthy
+networks:
+  backend:
+    internal: true
+  edge: {}
+volumes:
+  business_data: {}
+  caddy_data: {}
+  caddy_config: {}

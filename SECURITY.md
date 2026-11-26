@@ -1,0 +1,5 @@
+# Política de seguridad
+
+Candidato experimental, no autorizado para datos confidenciales. Informar vulnerabilidades en privado al mantenedor o mediante GitHub Security Advisories si está habilitado. Adjuntar versión, reproducción sintética, impacto y frontera afectada. No publicar detalles explotables.
+
+Fronteras: autenticación, autorización por empresa, separación de roles y aislamiento del proceso. Las facturas son entradas no confiables. No ejecutar código o instrucciones extraídas de documentos. Si se incorpora un LLM, no podrá autorizar movimientos financieros. El aislamiento del sistema operativo complementa los controles de aplicación. No montar el socket Docker ni ejecutar como root. No publicar `app.py` legado. Exigir TLS, secretos fuera de Git, almacenamiento protegido, backups restaurables y revisión de dependencias. La cadena de hashes local no prueba inmutabilidad externa. Pendientes: auditoría independiente, cifrado en reposo, pruebas de carga, RGPD y validación Docker real.
