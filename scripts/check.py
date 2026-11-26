@@ -7,3 +7,6 @@ print('PASS: regression and HTTP/DOM checks')
 subprocess.run([sys.executable,'-m','unittest','-v','test_i18n','adaptive_learning.test_learning'],cwd=root,check=True)
 subprocess.run([sys.executable,'scripts/check_http_locales.py'],cwd=root,check=True)
 print('PASS: nine locales, diagnostics, PDF and offline learner checks')
+
+subprocess.run([sys.executable,'-m','unittest','-v','test_procurement','test_procurement_extensions'],cwd=root,check=True)
+print('PASS: procurement pilot checks')

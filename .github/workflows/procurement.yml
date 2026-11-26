@@ -1,0 +1,22 @@
+name: Procurement extension acceptance
+on:
+  pull_request:
+    branches: [Main]
+  push:
+    branches: [feat/adaptive-procurement-v1]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m unittest -v test_procurement test_procurement_extensions
+      - run: python -m procurement_cli --db "$RUNNER_TEMP/ledger64-procurement.sqlite3" demo
+      - run: python -m procurement_cli --db "$RUNNER_TEMP/ledger64-procurement.sqlite3" verify

@@ -33,3 +33,9 @@ ale-evidence/
 **/trained_model*
 **/model.db
 *.pyc
+
+# Private procurement pilot databases
+*.sqlite3
+*.sqlite3-*
+*.sqlite
+*.sqlite-*
