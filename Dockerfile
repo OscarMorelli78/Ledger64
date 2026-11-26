@@ -6,7 +6,7 @@ RUN apk upgrade --no-cache && apk add --no-cache tesseract-ocr tesseract-ocr-dat
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && python -m pip check && python -m pip uninstall -y pip && rm -rf /usr/local/lib/python3.13/ensurepip/_bundled
 COPY engine.py ingest.py flexible.py independent.py decisions.py reporting.py ocr_review.py tenant.py governance.py intelligence.py secure_app.py admin.py secure_index.html login.html ui.js account.js governance.js intelligence.js login.js i18n.py i18n.js style.css demo.csv ./
-COPY procurement.py procurement_consensus.py procurement_semantic_v2.py procurement_references.py procurement_templates.py procurement_history.py procurement_ingest.py procurement_cli.py procurement_queue.py procurement_routes.py procurement.html procurement_ui.js ./
+COPY procurement.py procurement_table.py procurement_consensus.py procurement_semantic_v2.py procurement_references.py procurement_templates.py procurement_history.py procurement_ingest.py procurement_cli.py procurement_queue.py procurement_routes.py procurement.html procurement_ui.js ./
 COPY locales/ ./locales/
 COPY adaptive_learning/ ./adaptive_learning/
 USER 10001

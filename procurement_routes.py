@@ -17,6 +17,7 @@ from procurement_history import historical_report
 from procurement_ingest import extract,propose
 from procurement_consensus import compare_image
 from procurement_references import reference_check
+from procurement_table import table_drafts
 import procurement_queue as queue
 import tenant
 
@@ -43,6 +44,7 @@ def make_router(actor,body,origin,base,slots):
                     r={"status":"UNAPPROVED","proposal":proposal}
                 elif strategy=="standard":
                     r=extract(file,paddle_config=os.environ.get("BC_PROCUREMENT_PADDLE_CONFIG") or None)
+                    r["structured_tables"]=table_drafts(r.get("tables",[]))
                     model=os.environ.get("BC_PROCUREMENT_LOCAL_MODEL")
                     if model:r["proposal"]=propose(r,model)
                 else:raise ValueError("Unknown extraction strategy")

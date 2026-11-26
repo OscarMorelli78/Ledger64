@@ -125,3 +125,8 @@ conflicting references are reported and require investigation. This is advisory,
 not confirmation of receipt or authorization to pay. The experimental semantic
 v2 adapter is opt-in via `--semantic-v2 --ollama-model local-model`; no change
 of the default model or approval rules. New source selection clears old drafts.
+
+OCR table results now include inert row/column drafts. Merged cells, ragged or
+nested tables and unsafe markup are not converted; an operator must reconstruct
+those layouts. Blank cells remain blank. All cells require review, even when the
+model reports a high confidence. This parser does not verify actual OCR accuracy.

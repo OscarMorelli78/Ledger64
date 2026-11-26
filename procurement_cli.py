@@ -8,6 +8,7 @@ from procurement_history import historical_report
 from procurement_ingest import extract, propose, load_source
 from procurement_consensus import compare_image
 from procurement_semantic_v2 import propose_v2
+from procurement_table import table_drafts
 import procurement_templates as templates
 
 
@@ -65,6 +66,7 @@ def main():
             result=compare_image(args.source)
         else:
             data=extract(args.source,paddle_config=args.paddle_config,use_pymupdf=args.pymupdf)
+            data["structured_tables"]=table_drafts(data.get("tables",[]))
             if args.semantic_v2 and not args.ollama_model:parser.error("--semantic-v2 requires --ollama-model")
             result=(propose_v2 if args.semantic_v2 else propose)(data,args.ollama_model,args.confidence) if args.ollama_model else data
     else:
