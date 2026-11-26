@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0 — stable distribution candidate
+- Alpine runtime, Devanagari fonts, writable temporary font cache, updated dependencies and Node 24-based CI actions.
+- Traefik replaces Caddy as the default proxy; no Docker socket, bounded requests, TLS routing checks and independent image scan.
+- Release gated by real Docker, vulnerability scanning, international browser and synthetic learning acceptance.
+- Stable source distribution is not an independent production, accounting or tax certification; use synthetic data until deployment-specific checks and real-data validation pass.
+
 ## 0.1.0-rc.2 — international candidate
 - Nine-language UI, localized PDF output and documentation.
 - Nine landing pages and paused multilingual ad drafts.

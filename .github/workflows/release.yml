@@ -1,0 +1,57 @@
+name: Stable source release
+on:
+  workflow_dispatch:
+  push:
+    branches: [Main]
+    paths: ['.github/workflows/release.yml']
+permissions:
+  contents: read
+concurrency:
+  group: ledger64-stable-release
+  cancel-in-progress: false
+jobs:
+  container:
+    uses: ./.github/workflows/container.yml
+  international:
+    uses: ./.github/workflows/international.yml
+  learning:
+    uses: ./.github/workflows/learning.yml
+  publish:
+    needs: [container, international, learning]
+    if: github.ref == 'refs/heads/Main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Publish tested source and checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: v0.1.0
+        run: |
+          set -euo pipefail
+          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Version already exists; immutable release preserved."
+            exit 0
+          fi
+          mkdir -p /tmp/ledger64-release /tmp/ledger64-assets
+          git archive "$GITHUB_SHA" | tar -xf - -C /tmp/ledger64-release
+          cd /tmp/ledger64-release
+          rm -f SHA256SUMS
+          find . -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/ledger64-assets/SHA256SUMS
+          cp /tmp/ledger64-assets/SHA256SUMS .
+          sha256sum -c SHA256SUMS
+          tar -czf /tmp/ledger64-assets/Ledger64-v0.1.0.tar.gz .
+          cd /tmp/ledger64-assets
+          sha256sum Ledger64-v0.1.0.tar.gz > Ledger64-v0.1.0.tar.gz.sha256
+          cat > notes.md <<'EOF'
+          First stable source distribution of Ledger64 (MIT).
+          - Nine languages, C64 interface, invoice auditing and governance.
+          - Docker, OCR, PDF, browser, synthetic corpus and ALE acceptance passed.
+          - HIGH/CRITICAL vulnerability gate passed for the app and Compose proxy at release time.
+          - This is not a production security certification. Synthetic data only until deployment-specific validation, independent review and privacy controls are complete. ALE remains experimental and offline. No confidential documents are included.
+          EOF
+          gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Ledger64 v0.1.0" --notes-file notes.md --latest Ledger64-v0.1.0.tar.gz Ledger64-v0.1.0.tar.gz.sha256 SHA256SUMS

@@ -23,15 +23,34 @@ services:
       timeout: 5s
       retries: 3
   proxy:
-    image: caddy:2-alpine
+    image: traefik:v3.8.0
     restart: unless-stopped
+    command:
+      - --entrypoints.web.address=:8080
+      - --entrypoints.websecure.address=:8443
+      - --entrypoints.web.http.redirections.entrypoint.to=:443
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --providers.file.watch=false
+      - --certificatesresolvers.letsencrypt.acme.storage=/data/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --api=false
+      - --global.checknewversion=false
+      - --global.sendanonymoususage=false
     environment:
       BC_DOMAIN: '${BC_DOMAIN:?Set BC_DOMAIN}'
-    ports: ['80:80','443:443']
+      TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL: '${BC_ACME_EMAIL:-}'
+    ports: ['80:8080','443:8443']
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+      - ./deploy/traefik.yml:/etc/traefik/dynamic.yml:ro
+      - proxy_data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=64m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    pids_limit: 128
     networks: [backend, edge]
     depends_on:
       app:
@@ -42,5 +61,4 @@ networks:
   edge: {}
 volumes:
   business_data: {}
-  caddy_data: {}
-  caddy_config: {}
+  proxy_data: {}
