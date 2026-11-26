@@ -67,6 +67,12 @@ def grid_geometry(image):
             crop=mask.crop((max(0,x-3),max(0,y-3),min(mask.width,x+4),min(mask.height,y+4)))
             if crop.getextrema()[1]<200:raise ValueError("Broken grid intersection")
     for a,b in zip(ys,ys[1:]):
+        # A partial separator that disappears from the full-band projection
+        # must not silently merge adjacent cells.
+        local=mask.crop((0,a+5,mask.width,b-5))
+        local_xs=runs(projections(local,"col"),155)
+        if any(not any(abs(x-global_x)<=4 for global_x in xs) for x in local_xs):
+            raise ValueError("Partial vertical ruling")
         for x in xs:
             crop=mask.crop((max(0,x-3),a+5,min(mask.width,x+4),b-5))
             if sum(v>=100 for v in projections(crop,"row"))<.8*crop.height:raise ValueError("Missing vertical ruling")
