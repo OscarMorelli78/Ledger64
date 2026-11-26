@@ -8,7 +8,7 @@ from procurement_history import historical_report
 from procurement_ingest import extract, propose, load_source
 from procurement_consensus import compare_image
 from procurement_semantic_v2 import propose_v2
-from procurement_table import table_drafts
+from procurement_table import table_drafts,propose_from_cells
 import procurement_templates as templates
 
 
@@ -58,9 +58,20 @@ def main():
     a.add_argument("--proposer",required=True);a.add_argument("--reviewer",required=True);a.add_argument("--evidence",required=True)
     a=sub.add_parser("template-apply")
     a.add_argument("--tenant",required=True);a.add_argument("--id",required=True);a.add_argument("--source",type=Path,required=True)
+    a=sub.add_parser("table-propose")
+    a.add_argument("--extraction",type=Path,required=True);a.add_argument("--index",type=int,required=True)
+    a.add_argument("--metadata",type=Path,required=True);a.add_argument("--mapping",type=Path,required=True)
     sub.add_parser("verify")
     args=parser.parse_args()
-    if args.action=="extract":
+    if args.action=="table-propose":
+        def read_json(path):
+            if path.stat().st_size>2_000_000:raise ValueError("Oversized input JSON")
+            return json.loads(path.read_text(encoding="utf-8"))
+        extracted=read_json(args.extraction)
+        tables=extracted["structured_tables"]
+        if not 0<=args.index<len(tables):raise ValueError("Invalid table index")
+        result=propose_from_cells(tables[args.index],read_json(args.metadata),read_json(args.mapping),extracted["source_sha256"])
+    elif args.action=="extract":
         if args.consensus:
             if args.ollama_model or args.paddle_config or args.pymupdf or args.semantic_v2:parser.error("--consensus is a separate image-only strategy")
             result=compare_image(args.source)

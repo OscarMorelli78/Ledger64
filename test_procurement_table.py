@@ -1,5 +1,5 @@
 import unittest
-from procurement_table import parse_cells,table_drafts
+from procurement_table import parse_cells,table_drafts,propose_from_cells
 
 class TableTests(unittest.TestCase):
     def test_exact_positions(self):
@@ -21,4 +21,30 @@ class TableTests(unittest.TestCase):
         r=table_drafts([{"page":1,"html_untrusted":"<table><tr><td>12</td></tr></table>"},{"page":2,"html_untrusted":"bad"}])
         self.assertEqual(r[0]["status"],"REVIEW_REQUIRED")
         self.assertIsNone(r[1]["cells"])
+class TableProposalTests(unittest.TestCase):
+    def setUp(self):
+        self.table={"page":1,"status":"REVIEW_REQUIRED","cells":[["No","Ref","Unit","Qty","Price","Discount"],["1","P","ud","20","12.50","5"]]}
+        self.metadata={"kind":"order","id":"O1","supplier":"S","date":"2026-01-01","currency":"EUR"}
+        self.mapping=dict(zip(("id","sku","unit","quantity","unit_price","discount_pct"),self.table["cells"][0]))
+    def test_exact_source_cell_evidence(self):
+        r=propose_from_cells(self.table,self.metadata,self.mapping,"a"*64)
+        self.assertEqual(r["candidate"]["lines"][0]["unit_price"],"12.50")
+        self.assertEqual(r["cell_evidence"][0]["unit_price"]["column"],5)
+        self.assertEqual(r["cell_evidence"][0]["unit_price"]["row"],2)
+        self.assertEqual(r["status"],"REVIEW_REQUIRED")
+    def test_missing_mapping(self):
+        del self.mapping["unit_price"]
+        with self.assertRaises(ValueError):propose_from_cells(self.table,self.metadata,self.mapping,"a"*64)
+    def test_blank_amount(self):
+        self.table["cells"][1][4]=""
+        with self.assertRaises(ValueError):propose_from_cells(self.table,self.metadata,self.mapping,"a"*64)
+    def test_invalid_source_hash(self):
+        with self.assertRaises(ValueError):propose_from_cells(self.table,self.metadata,self.mapping,"missing")
+    def test_duplicate_column(self):
+        self.table["cells"][0][4]="Qty"
+        with self.assertRaises(ValueError):propose_from_cells(self.table,self.metadata,self.mapping,"a"*64)
+    def test_invoice_requires_references(self):
+        self.metadata["kind"]="invoice"
+        with self.assertRaises(ValueError):propose_from_cells(self.table,self.metadata,self.mapping,"a"*64)
+
 if __name__=="__main__":unittest.main()

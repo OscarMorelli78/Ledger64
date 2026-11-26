@@ -54,3 +54,41 @@ def table_drafts(tables):
         except (ValueError,TypeError,KeyError):
             out.append({"page":t.get("page") if isinstance(t,dict) else None,"status":"REVIEW_REQUIRED_UNSUPPORTED_TABLE","cells":None})
     return out
+
+
+def propose_from_cells(table,metadata,mapping,source_sha256):
+    """Build an unapproved candidate from explicit columns and reviewed header data.
+
+    No fuzzy headers, inferred monetary values, row merges or implicit metadata.
+    Caller must independently review metadata against the original document.
+    """
+    import re
+    from procurement import validate
+    from procurement_consensus import HEAD,COMMON,EXTRA
+    if not isinstance(source_sha256,str) or not re.fullmatch(r"[a-f0-9]{64}",source_sha256):
+        raise ValueError("Original source hash required")
+    if not isinstance(metadata,dict) or set(metadata)!=set(HEAD) or metadata.get("kind") not in EXTRA:
+        raise ValueError("Explicit document metadata required")
+    if not isinstance(table,dict) or table.get("status")!="REVIEW_REQUIRED":
+        raise ValueError("Usable structured table required")
+    cells=table.get("cells");page=table.get("page")
+    if type(page) is not int or page<1 or not isinstance(cells,list) or not 2<=len(cells)<=1001:
+        raise ValueError("Invalid table")
+    header=cells[0]
+    if not isinstance(header,list) or not 1<=len(header)<=50 or not all(isinstance(v,str) and v for v in header) or len(set(header))!=len(header):
+        raise ValueError("Unique nonempty column labels required")
+    keys=COMMON+EXTRA[metadata["kind"]]
+    if not isinstance(mapping,dict) or set(mapping)!=set(keys) or not all(isinstance(v,str) and v in header for v in mapping.values()) or len(set(mapping.values()))!=len(keys):
+        raise ValueError("Complete unambiguous mapping required")
+    indexes={k:header.index(v) for k,v in mapping.items()}
+    lines=[];evidence=[]
+    for i,row in enumerate(cells[1:],2):
+        if not isinstance(row,list) or len(row)!=len(header) or not all(isinstance(v,str) for v in row):
+            raise ValueError("Ragged or invalid table row")
+        line={k:row[indexes[k]] for k in keys}
+        lines.append(line)
+        evidence.append({k:{"page":page,"row":i,"column":indexes[k]+1,"header":mapping[k],"text":line[k]} for k in keys})
+    candidate=validate(dict(metadata,lines=lines))
+    return {"status":"REVIEW_REQUIRED","candidate":candidate,"source_sha256":source_sha256,
+            "cell_evidence":evidence,"metadata_status":"MANUALLY_SUPPLIED_UNVERIFIED",
+            "warning":"Review all metadata and cell readings against original. No automatic approval."}

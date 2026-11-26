@@ -130,3 +130,14 @@ OCR table results now include inert row/column drafts. Merged cells, ragged or
 nested tables and unsafe markup are not converted; an operator must reconstruct
 those layouts. Blank cells remain blank. All cells require review, even when the
 model reports a high confidence. This parser does not verify actual OCR accuracy.
+
+## Explicit OCR table mapping (experimental)
+
+The `table-propose` CLI subcommand accepts an extraction JSON, zero-based table
+index, manually supplied document metadata JSON (kind,id,supplier,date,currency),
+and complete JSON mapping of canonical line field names to exact table headers.
+It constructs an unapproved candidate directly from cells and preserves the
+page, row, column, header and original source hash for each field. It does not
+use a language model to rewrite amounts. Duplicate headers, missing references,
+empty required fields and unsupported table shapes fail closed. The metadata is
+explicitly marked unverified; compare it to the original before independent review.
