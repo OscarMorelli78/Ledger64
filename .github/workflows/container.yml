@@ -1,5 +1,6 @@
 name: Container acceptance
 on:
+  workflow_call:
   workflow_dispatch:
   push:
     branches: [Main, main]
@@ -13,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency:
-      group: container-acceptance-${{ github.ref }}
+      group: container-acceptance-${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v6
@@ -27,6 +28,9 @@ jobs:
       - run: BC_DOMAIN=ledger64.example.invalid docker compose config --quiet
       - run: docker build --pull -t ledger64:ci .
       - run: bash smoke_container.sh ledger64:ci
+      - name: Verify OCR and all nine PDF locales inside runtime image
+        run: |
+          docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,nodev,size=128m --cap-drop ALL --security-opt no-new-privileges --memory 1g --pids-limit 128 -v "$PWD/demo_scan.pdf:/app/demo_scan.pdf:ro" --entrypoint python ledger64:ci -c 'from pathlib import Path; from ocr_review import transcribe; from ingest import audit_document; from reporting import report_pdf; from i18n import LANGS,tr; from pypdf import PdfReader; import io; raw=Path("demo_scan.pdf").read_bytes(); r=transcribe(raw,"eng"); assert r["status"]=="BORRADOR_NO_VERIFICADO" and "12345" in r["pages"][0]["text"] and "120.00" in r["pages"][0]["text"]; assert transcribe(raw,"spa")["pages"]; report=audit_document(Path("demo.csv").read_bytes(),True); results=[PdfReader(io.BytesIO(report_pdf(report,l))) for l in LANGS]; assert all(p.pages and p.metadata.title==tr("Informe ejecutivo de compras",l) and "30.00" in " ".join(page.extract_text() for page in p.pages) for l,p in zip(LANGS,results)); print("Runtime OCR and PDF 9/9 passed")'
       - name: 10000 invoices in Docker Engine
         run: |
           sudo install -d -o 10001 -g 10001 -m 755 corpus-output
@@ -52,3 +56,7 @@ jobs:
           exit-code: '1'
           format: table
           cache: 'false'
+      - name: Scan the Compose reverse proxy as well
+        run: |
+          docker pull caddy:2-alpine
+          trivy image --scanners vuln --severity HIGH,CRITICAL --exit-code 1 caddy:2-alpine
