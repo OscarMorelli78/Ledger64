@@ -27,6 +27,17 @@ jobs:
       - uses: actions/configure-pages@v6
       - name: Generate SEO metadata for the live project URL
         run: python scripts/site_metadata.py https://oscarmorelli78.github.io/Ledger64/
+      - name: Test synthetic procurement simulation
+        run: |
+          node - <<'JS'
+          const assert=require('node:assert/strict');
+          const {calculate,defaults,dictionary}=require('./site/demo/procurement.js');
+          assert.deepEqual(calculate(defaults),{billed:96000n,expected:81000n,exposure:15000n});
+          assert.equal(calculate([100,50,50,40,60,36000,54000,1000,10]).exposure,0n);
+          assert.throws(()=>calculate([-1,0,0,0,0,0,0,0,0]));
+          assert.equal(Object.keys(dictionary).length,9);
+          assert.ok(Object.values(dictionary).every(x=>x.length===18&&x.every(Boolean)));
+          JS
       - name: Stage public project documentation and synthetic demo
         run: |
           python - <<'PY'
@@ -63,6 +74,9 @@ jobs:
           (target / 'demo').mkdir()
           shutil.copyfile(Path('site/demo/index.html'), target / 'demo/index.html')
           assert (target / 'demo/index.html').is_file()
+          for name in ('procurement.html','procurement.js'):
+              shutil.copyfile(Path('site/demo') / name, target / 'demo' / name)
+          assert len(list((target / 'demo').iterdir())) == 3
           # Google Search Console ownership verification (public file).
           (target / 'googledaf0135fdcc28f06.html').write_text('google-site-verification: googledaf0135fdcc28f06.html\n', encoding='utf-8')
           # Public IndexNow ownership file, scoped to this project path.
