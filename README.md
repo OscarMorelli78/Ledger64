@@ -14,6 +14,12 @@ Open-source invoice auditing, purchase cost comparison and financial governance 
 
 **[TRY LIVE DEMO — English / Español](https://oscarmorelli78.github.io/Ledger64/demo/)** — No installation, no account, synthetic data only. This standalone JavaScript demonstration illustrates invoice checks, price comparisons and estimated savings; it does not run the original Python engine or certify financial results.
 
+## Experimental Procurement Intelligence
+
+The separate experimental branch adds local 3-way matching, partial deliveries, multiple invoices, tolerances, contract discounts, reviewed OCR, supplier layouts, document revisions and verified SQLite recovery. Synthetic data only. **108 tests passed at f9fd4a66**; five-image acceptance 4/5 first-pass, 5/5 after simulated review. No production certification or autonomous payment. The stable release is unchanged.
+
+[Experimental manual (nine languages)](docs/manual/en.md) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)
+
 ## Quick start
 
 Install Python 3.13, Node.js for regression tests, Tesseract with English and Spanish models for OCR, Pango and Noto fonts for PDF. Create a virtual environment and install the pinned dependencies. On Windows use PowerShell activation and `$env:` variables. Set a private data directory; never expose the legacy `app.py`.

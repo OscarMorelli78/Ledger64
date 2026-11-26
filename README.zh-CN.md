@@ -61,3 +61,9 @@ MIT 适用于原创代码，依赖保留各自许可。勿提交个人标识、�
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## 实验性采购智能
+
+本地试点：三方核对、人工审核OCR、模板、更正及验证恢复。仅合成数据；参见手册新增章节。
+
+[实验性采购智能](docs/manual/zh-CN.md) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)

@@ -61,3 +61,9 @@ MIT मूल कोड पर लागू, निर्भरताओं क�
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## प्रयोगात्मक खरीद बुद्धिमत्ता
+
+स्थानीय पायलट: तीन-तरफा मिलान, समीक्षित OCR, टेम्पलेट, संशोधन और सत्यापित पुनर्प्राप्ति। केवल कृत्रिम डेटा; नया मैनुअल अध्याय देखें।
+
+[प्रयोगात्मक खरीद बुद्धिमत्ता](docs/manual/hi.md) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)

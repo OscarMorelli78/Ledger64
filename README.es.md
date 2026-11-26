@@ -61,3 +61,9 @@ MIT cubre el código original; dependencias conservan licencias. No subas identi
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## Inteligencia de compras experimental
+
+Piloto local con conciliación tridimensional, OCR revisado, plantillas, rectificaciones y recuperación verificada. Solo datos sintéticos; consulta el nuevo capítulo del manual.
+
+[Inteligencia de compras experimental](docs/manual/es.md) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)

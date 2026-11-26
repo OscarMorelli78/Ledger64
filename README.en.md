@@ -61,3 +61,9 @@ MIT applies to original code; dependencies retain licenses. Never commit persona
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## Experimental procurement intelligence
+
+Local pilot with 3-way matching, reviewed OCR, supplier templates, document corrections and verified recovery. Synthetic data only; see the new manual chapter for activation.
+
+[Experimental procurement intelligence](docs/manual/en.md) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)

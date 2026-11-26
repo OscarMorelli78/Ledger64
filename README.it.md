@@ -61,3 +61,9 @@ MIT copre codice originale; dipendenze mantengono licenze. Non pubblicare identi
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## Intelligence acquisti sperimentale
+
+Pilota locale: riconciliazione a tre documenti, OCR revisionato, modelli, correzioni e ripristino verificato. Solo dati sintetici; consulta il nuovo capitolo.
+
+[Intelligence acquisti sperimentale](docs/manual/it.md) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)
