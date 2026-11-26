@@ -6,6 +6,7 @@ from pathlib import Path
 from procurement import Store, canonical, reconcile
 from procurement_history import historical_report
 from procurement_ingest import extract, propose, load_source
+import procurement_templates as templates
 
 
 def demo(store):
@@ -46,6 +47,13 @@ def main():
     a.add_argument("source",type=Path);a.add_argument("--paddle-config",type=Path)
     a.add_argument("--pymupdf",action="store_true");a.add_argument("--ollama-model")
     a.add_argument("--confidence",type=float,default=.90)
+    a=sub.add_parser("template-register")
+    a.add_argument("--tenant",required=True);a.add_argument("--kind",required=True)
+    a.add_argument("--supplier",required=True);a.add_argument("--mapping",type=Path,required=True)
+    a.add_argument("--example",type=Path,required=True);a.add_argument("--delimiter",default=",")
+    a.add_argument("--proposer",required=True);a.add_argument("--reviewer",required=True);a.add_argument("--evidence",required=True)
+    a=sub.add_parser("template-apply")
+    a.add_argument("--tenant",required=True);a.add_argument("--id",required=True);a.add_argument("--source",type=Path,required=True)
     sub.add_parser("verify")
     args=parser.parse_args()
     if args.action=="extract":
@@ -59,6 +67,13 @@ def main():
                 if args.document.stat().st_size>2_000_000:raise ValueError("Candidate too large")
                 doc=json.loads(args.document.read_text(encoding="utf-8"))
                 result={"approved_hash":store.approve(args.tenant,True,doc,raw,args.proposer,args.reviewer,args.evidence)}
+            elif args.action=="template-register":
+                example,_=load_source(args.example)
+                mapping=json.loads(args.mapping.read_text(encoding="utf-8"))
+                result={"template_id":templates.register(store,args.tenant,True,args.kind,args.supplier,mapping,args.delimiter,example,args.proposer,args.reviewer,args.evidence)}
+            elif args.action=="template-apply":
+                raw,_=load_source(args.source)
+                result=templates.apply(store,args.tenant,True,args.id,raw)
             elif args.action=="match":result=reconcile(store.documents(args.tenant,True),args.as_of,{"quantity":args.quantity,"amount":args.amount,"price_pct":args.price_pct})
             elif args.action=="history":result=historical_report(store,args.tenant,True,args.as_of,args.rise_pct)
             else:

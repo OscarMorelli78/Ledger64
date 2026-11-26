@@ -93,3 +93,23 @@ advanced Paddle and Ollama use optional trusted server configuration. The pilot
 database is separate; existing backup/restore does not include it. Production
 backup, retention, revocation of approved documents, model benchmark and a
 complete browser/UX evaluation remain mandatory before real-data release.
+
+## Supervised supplier templates and model benchmarking
+
+The new trusted local CLI supports template-register and template-apply. The mapping
+JSON uses the required canonical keys from procurement_templates.fields(kind),
+pointing to the CSV column names. A template is tied to tenant, supplier, document
+kind, ordered header signature, version, original example hash and distinct review
+identities. Changed headers require a new version. Applying a template creates an
+unapproved candidate. The earlier web template module remains unchanged; automatic
+PDF layout training is not implemented.
+
+    python scripts/benchmark_procurement_ocr.py --backend tesseract
+    python scripts/benchmark_procurement_ocr.py --backend paddle --config /private/pipeline.yaml
+    python scripts/benchmark_procurement_ocr.py --backend paddle --config /private/pipeline.yaml --model local-model
+
+The benchmark records per-case latency, Linux peak RSS, exact token recovery and
+recognized table count. This smoke benchmark cannot establish actual financial field
+accuracy or production capacity. Use a held-out labelled corpus and security review
+before selecting or distributing an advanced model. The local LLM now receives an
+explicit structured-output schema; its results still require independent review.

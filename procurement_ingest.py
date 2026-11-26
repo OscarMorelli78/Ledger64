@@ -165,7 +165,13 @@ def propose(extraction,model,confidence_threshold=.90):
       "{id,sku,unit:kg|l|ud,quantity:decimal string, plus order: unit_price,discount_pct; "
       "receipt: order_id,order_line; invoice: order_id,order_line,net_total}]}."
       " Return an object with candidate and evidence (list of exact quotes from pages).")
-    payload=json.dumps({"model":model,"stream":False,"format":"json","options":{"temperature":0,"num_predict":2048},
+    def schema_for(kind):
+        keys=["id","sku","unit","quantity"]+({"order":["unit_price","discount_pct"],"receipt":["order_id","order_line"],"invoice":["order_id","order_line","net_total"]}[kind])
+        line={"type":"object","properties":{k:{"type":"string"} for k in keys},"required":keys,"additionalProperties":False}
+        props={"kind":{"const":kind},"id":{"type":"string"},"supplier":{"type":"string"},"date":{"type":"string"},"currency":{"const":"EUR"},"lines":{"type":"array","items":line,"minItems":1,"maxItems":1000}}
+        return {"type":"object","properties":props,"required":list(props),"additionalProperties":False}
+    schema={"type":"object","properties":{"candidate":{"anyOf":[{"type":"null"}]+[schema_for(k) for k in ("order","receipt","invoice")]},"evidence":{"type":"array","items":{"type":"string"}}},"required":["candidate","evidence"],"additionalProperties":False}
+    payload=json.dumps({"model":model,"stream":False,"format":schema,"options":{"temperature":0,"num_predict":2048},
         "messages":[{"role":"system","content":instructions},{"role":"user","content":json.dumps(extraction,ensure_ascii=False)}]}).encode()
     opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect())
     req=urllib.request.Request("http://127.0.0.1:11434/api/chat",data=payload,headers={"Content-Type":"application/json"})
