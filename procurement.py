@@ -170,7 +170,7 @@ class Store:
             actual.add((tenant, synthetic, kind, supplier, key, source, h, proposer, reviewer, evidence))
         return actual == expected
 
-    def approve(self, tenant, synthetic, document, original, proposer, reviewer, evidence):
+    def _approve_in_tx(self, tenant, synthetic, document, original, proposer, reviewer, evidence):
         scope = self.scope(tenant, synthetic)
         identifier(proposer)
         identifier(reviewer)
@@ -187,24 +187,28 @@ class Store:
         key = (*scope, document["kind"], document["supplier"].casefold(), document["id"].casefold())
         source, h = digest(original), digest(body.encode())
         entry = canonical([*key, source, h, proposer, reviewer, evidence])
+        if not self.verify():
+            raise ValueError("Ledger integrity failure")
+        self.db.execute("INSERT INTO procurement_docs VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (*key, body, source, h, original, proposer, reviewer, evidence))
+        last = self.db.execute("SELECT hash FROM procurement_events ORDER BY seq DESC LIMIT 1").fetchone()
+        prev = last[0] if last else "0" * 64
+        self.db.execute("INSERT INTO procurement_events(body,prev,hash) VALUES(?,?,?)",
+                        (entry, prev, digest((prev + entry).encode())))
+        return h
+
+    def approve(self, tenant, synthetic, document, original, proposer, reviewer, evidence):
         try:
             self.db.execute("BEGIN IMMEDIATE")
-            if not self.verify():
-                raise ValueError("Ledger integrity failure")
-            self.db.execute("INSERT INTO procurement_docs VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
-                            (*key, body, source, h, original, proposer, reviewer, evidence))
-            last = self.db.execute("SELECT hash FROM procurement_events ORDER BY seq DESC LIMIT 1").fetchone()
-            prev = last[0] if last else "0" * 64
-            self.db.execute("INSERT INTO procurement_events(body,prev,hash) VALUES(?,?,?)",
-                            (entry, prev, digest((prev + entry).encode())))
+            result = self._approve_in_tx(tenant, synthetic, document, original, proposer, reviewer, evidence)
             self.db.commit()
+            return result
         except sqlite3.IntegrityError as exc:
             self.db.rollback()
             raise ValueError("Duplicate or conflicting document; no overwrite") from exc
         except BaseException:
             self.db.rollback()
             raise
-        return h
 
     def documents(self, tenant, synthetic):
         scope = self.scope(tenant, synthetic)
