@@ -61,3 +61,7 @@ MIT 适用于原创代码，依赖保留各自许可。勿提交个人标识、�
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## 实验性采购智能 — 独立分支
+
+[实验性采购智能 — 独立分支](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/zh-CN.md) · [Demo](https://oscarmorelli78.github.io/Ledger64/demo/procurement.html?lang=zh-CN) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)

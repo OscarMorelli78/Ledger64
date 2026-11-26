@@ -61,3 +61,7 @@ MIT gilt für Originalcode; Abhängigkeiten behalten ihre Lizenzen. Keine person
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## Experimentelle Einkaufsintelligenz — separater Branch
+
+[Experimentelle Einkaufsintelligenz — separater Branch](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/de.md) · [Demo](https://oscarmorelli78.github.io/Ledger64/demo/procurement.html?lang=de) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)

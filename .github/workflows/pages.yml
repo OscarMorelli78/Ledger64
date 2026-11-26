@@ -110,6 +110,11 @@ jobs:
           demo = target / 'demo/index.html'
           if initial or read_live(base + 'demo/') != demo.read_bytes():
               changed.append({'url': base + 'demo/', 'file': 'demo/index.html'})
+          for name in ('procurement.html','procurement.js'):
+              file = target / 'demo' / name
+              url = base + 'demo/' + name
+              if initial or read_live(url) != file.read_bytes():
+                  changed.append({'url': url, 'file': 'demo/' + name})
           Path('_indexnow_changes.json').write_text(json.dumps(changed), encoding='utf-8')
           print(f'New or changed pages: {len(changed)}')
           PY

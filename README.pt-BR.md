@@ -61,3 +61,7 @@ MIT cobre código original; dependências mantêm licenças. Não publique ident
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## Inteligência de compras experimental — branch separado
+
+[Inteligência de compras experimental — branch separado](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/pt-BR.md) · [Demo](https://oscarmorelli78.github.io/Ledger64/demo/procurement.html?lang=pt-BR) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)

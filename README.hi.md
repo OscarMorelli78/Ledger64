@@ -61,3 +61,7 @@ MIT मूल कोड पर लागू, निर्भरताओं क�
 ## Community & professional services
 
 [Commercial services](COMMERCIAL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contact](CONTACT.md) · [Contribute worldwide](COLLABORATORS.md)
+
+## प्रयोगात्मक खरीद बुद्धिमत्ता — अलग शाखा
+
+[प्रयोगात्मक खरीद बुद्धिमत्ता — अलग शाखा](https://github.com/OscarMorelli78/Ledger64/blob/feat/adaptive-procurement-v1/docs/manual/hi.md) · [Demo](https://oscarmorelli78.github.io/Ledger64/demo/procurement.html?lang=hi) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CI](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410)
