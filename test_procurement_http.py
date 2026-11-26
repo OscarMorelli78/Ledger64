@@ -106,6 +106,9 @@ class ProcurementHTTP(unittest.TestCase):
             key,_=self.submit(a,doc)
             self.assertEqual(self.send(b,"review",{"id":key,"decision":"APPROVED","evidence":"Independent synthetic original review"}).status_code,200)
         record=next(x for x in a.get("/procurement/api/revisions").json()["documents"] if x["kind"]=="invoice")
+        h=record["versions"][0]["source_sha256"]
+        self.assertEqual(a.get("/procurement/api/original/"+h).content,canonical(invoice("I","50","600")).encode())
+        self.assertEqual(other.get("/procurement/api/original/"+h).status_code,404)
         payload=dict(kind="invoice",supplier="S",doc_id="I",expected_version=record["versions"][-1]["version"],action="CORRECT",document=invoice("I","50","450"),evidence="Verified transcription error")
         self.assertEqual(self.send(reader,"revision-submit",payload).status_code,403)
         self.assertEqual(self.send(other,"revision-submit",payload).status_code,400)
@@ -121,5 +124,11 @@ class ProcurementHTTP(unittest.TestCase):
         self.assertEqual(current["requests"][0]["status"],"APPROVED")
         self.assertEqual(other.get("/procurement/api/revisions").json(),{"documents":[],"requests":[]})
         self.assertEqual(self.send(a,"revision-submit",payload).status_code,400)
+        payload.update(expected_version=next(x for x in current["documents"] if x["kind"]=="invoice")["versions"][-1]["version"],action="REVOKE",document=None,evidence="Synthetic invoice withdrawn")
+        r=self.send(a,"revision-submit",payload);self.assertEqual(r.status_code,200,r.text)
+        self.assertEqual(self.send(b,"revision-review",dict(id=r.json()["id"],decision="APPROVED",evidence="Independent synthetic revocation")).status_code,200)
+        report=self.send(reader,"report",{"as_of":"2026-01-31","tolerances":{}})
+        self.assertIsNone(report.json()["history"]["invoice_audit"])
+        self.assertEqual(a.get("/procurement/api/original/"+h).content,canonical(invoice("I","50","600")).encode())
 
 if __name__=="__main__":unittest.main()

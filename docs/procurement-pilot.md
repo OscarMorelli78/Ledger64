@@ -175,3 +175,8 @@ revision request queue. Analysts/owners propose; a distinct owner approves or
 rejects. Only approved events change the current snapshot. Requests are scoped
 to the company and synthetic class; stale version requests fail closed. Web
 revision history is explicit; original approval cases remain historical records.
+
+Approved original sources remain downloadable by their original hash within the
+same authenticated company, even after revocation. They are never exposed to
+other tenants. The browser test exercises a two-person revocation and checks
+that the original bytes are unchanged.

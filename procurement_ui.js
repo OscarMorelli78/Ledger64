@@ -123,6 +123,7 @@ async function refreshRevisions(){
   for(const record of data.documents){
     const box=document.createElement('article'),last=record.versions.at(-1),d=last.document;
     addText(box,'h3',d.kind+' · '+d.id+' · '+last.status);
+    const sourceLink=addText(box,'a','Download approved original');sourceLink.href='/procurement/api/original/'+encodeURIComponent(last.source_sha256);
     const details=document.createElement('details');addText(details,'summary','Immutable versions');addText(details,'pre',JSON.stringify(record.versions,null,2));box.append(details);
     if(last.status==='ACTIVE'){
       const candidate=document.createElement('textarea');candidate.rows=10;candidate.value=JSON.stringify(d,null,2);candidate.setAttribute('aria-label','Corrected document '+d.id);box.append(candidate);

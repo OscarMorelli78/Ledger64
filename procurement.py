@@ -245,6 +245,20 @@ class Store:
         except BaseException:
             self.db.rollback();raise
 
+    def original_source(self,tenant,synthetic,source_sha256):
+        scope=self.scope(tenant,synthetic)
+        if not isinstance(source_sha256,str) or not re.fullmatch(r"[a-f0-9]{64}",source_sha256):
+            raise ValueError("Invalid source hash")
+        self.db.execute("BEGIN")
+        try:
+            self._replay()
+            row=self.db.execute("SELECT original FROM procurement_docs WHERE tenant=? AND synthetic=? AND source_hash=?",(*scope,source_sha256)).fetchone()
+            if row is None:raise KeyError("Unknown source")
+            self.db.commit()
+            return row[0]
+        except BaseException:
+            self.db.rollback();raise
+
     def _approve_in_tx(self, tenant, synthetic, document, original, proposer, reviewer, evidence):
         scope = self.scope(tenant, synthetic)
         identifier(proposer)

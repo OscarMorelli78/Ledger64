@@ -97,6 +97,16 @@ def make_router(actor,body,origin,base,slots):
     def script(req:Request):
         if not actor(req):return error(401,"Sign in")
         return Response((base/"procurement_ui.js").read_bytes(),media_type="application/javascript")
+    @router.get("/procurement/api/original/{source_sha256}")
+    def approved_source(req:Request,source_sha256:str):
+        u=actor(req)
+        if not u:return error(401,"Sign in")
+        try:
+            with db(u) as store:
+                raw=store.original_source(u["company"],True,source_sha256)
+                return Response(raw,media_type="application/octet-stream",headers={"Content-Disposition":"attachment; filename=review-source.bin","Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})
+        except KeyError:return error(404,"Unknown source")
+        except (ValueError,sqlite3.Error):return error(409,"Cannot verify original source")
     @router.get("/procurement/api/revisions")
     def revisions(req:Request):
         u=actor(req)

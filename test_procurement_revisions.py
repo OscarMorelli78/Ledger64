@@ -44,6 +44,13 @@ class RevisionTests(unittest.TestCase):
         with Store(self.path) as s:
             self.change(s,action="REVOKE")
             with self.assertRaises(ValueError):s.approve("A",True,self.doc,b"different","a","b","Synthetic reimport attempt")
+    def test_revoked_original_remains_accessible_only_in_scope(self):
+        with Store(self.path) as s:
+            h=next(x for x in s.revisions("A",True) if x["kind"]=="invoice")["versions"][0]["source_sha256"]
+            self.change(s,action="REVOKE")
+            self.assertEqual(s.original_source("A",True,h),canonical(self.doc).encode())
+            with self.assertRaises(KeyError):s.original_source("B",True,h)
+            with self.assertRaises(KeyError):s.original_source("A",False,h)
     def test_revision_event_tampering(self):
         with Store(self.path) as s:
             self.change(s,doc=invoice("I","50","450"))
