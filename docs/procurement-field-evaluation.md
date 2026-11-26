@@ -98,3 +98,9 @@ with the already approved order, product, unit and date. The fixture truth is
 used only to score the result, not choose the alternate. `--strict` disallows
 assistance. Runtime exposes alternatives as read-only suggestions; it never
 automatically replaces the value or approves the document.
+
+Reference rereads now include two bounded visual variants (tight crop, 3x
+resolution, and thresholded 2x crop) with linguistic dictionaries disabled.
+These are generic OCR settings without character whitelists, expected reference
+hints or fuzzy replacement. Alternatives remain unverified; the reviewed test
+still requires a unique exact compatible reading and exact final ground truth.

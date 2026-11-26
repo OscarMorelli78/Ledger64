@@ -82,12 +82,23 @@ def grid_geometry(image):
             if sum(v>=100 for v in projections(crop,"col"))<.8*crop.width:raise ValueError("Missing horizontal ruling")
     return xs,ys
 
-def read_cell(binary,image,path,*,language="spa+eng",psm=7,upscale=False):
-    if upscale and image.width*image.height*4<=MAX_PIXELS:
-        image=image.resize((image.width*2,image.height*2),Image.Resampling.LANCZOS)
-    image=ImageOps.expand(image,border=12,fill=255)
+def prepare_cell(image,*,scale=1,tight=False,binarize=False):
+    if type(scale) is not int or scale not in (1,2,3):raise ValueError("Invalid OCR scale")
+    if tight:
+        box=dark(image).getbbox()
+        if box:image=image.crop(box)
+    if binarize:image=image.convert("L").point(lambda x:0 if x<160 else 255)
+    if (image.width*scale+24)*(image.height*scale+24)>MAX_PIXELS:raise ValueError("Oversized cell variant")
+    if scale!=1:image=image.resize((image.width*scale,image.height*scale),Image.Resampling.LANCZOS)
+    return ImageOps.expand(image,border=12,fill=255)
+
+def read_cell(binary,image,path,*,language="spa+eng",psm=7,upscale=False,scale=None,tight=False,binarize=False,no_dictionary=False):
+    scale=scale if scale is not None else (2 if upscale and image.width*image.height*4<=MAX_PIXELS else 1)
+    image=prepare_cell(image,scale=scale,tight=tight,binarize=binarize)
     image.save(path)
-    proc=subprocess.run([binary,str(path),"stdout","-l",language,"--psm",str(psm),"tsv"],
+    args=[binary,str(path),"stdout","-l",language,"--psm",str(psm)]
+    if no_dictionary:args.extend(["-c","load_system_dawg=0","-c","load_freq_dawg=0"])
+    proc=subprocess.run(args+["tsv"],
                         capture_output=True,timeout=10,check=False)
     if proc.returncode or len(proc.stdout)>100_000:raise ValueError("Cell OCR failed")
     words=[];scores=[]
@@ -156,9 +167,20 @@ def reread_cells(raw,table,positions):
             box=(xs[c]+6,ys[r]+6,xs[c+1]-6,ys[r+1]-6)
             crop=image.crop(box)
             readings=[]
-            for lang,psm,up in (("eng",7,True),("eng",8,True),("spa+eng",13,True)):
-                value,confidence=read_cell(binary,crop,path,language=lang,psm=psm,upscale=up)
-                readings.append({"text":value,"confidence":confidence,"language":lang,"psm":psm,"upscale":up})
+            # General visual variants, not a whitelist or a known-order prompt.
+            variants=(
+                dict(language="eng",psm=7,scale=2),
+                dict(language="eng",psm=8,scale=2),
+                dict(language="spa+eng",psm=13,scale=2),
+                dict(language="eng",psm=7,scale=3,tight=True,no_dictionary=True),
+                dict(language="eng",psm=8,scale=2,tight=True,binarize=True,no_dictionary=True),
+            )
+            for variant in variants:
+                try:value,confidence=read_cell(binary,crop,path,**variant)
+                except (ValueError,subprocess.TimeoutExpired):
+                    readings.append({"text":"","confidence":None,**variant,"status":"UNAVAILABLE"})
+                    continue
+                readings.append({"text":value,"confidence":confidence,**variant,"status":"UNVERIFIED"})
             results.append({"row":r+1,"column":c+1,"rectified_bbox":list(box),"readings":readings})
     return {"status":"REVIEW_REQUIRED","source_sha256":digest(raw),"alternatives":results,
             "warning":"Alternatives are not corrected or approved values; compare original."}

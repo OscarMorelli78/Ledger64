@@ -1,7 +1,7 @@
 import io
 import unittest
 from PIL import Image,ImageDraw
-from procurement_geometry import deskew,grid_geometry,extract_grid,reread_cells
+from procurement_geometry import deskew,grid_geometry,extract_grid,reread_cells,prepare_cell,read_cell
 from procurement_table import canonical_columns
 
 def image(angle=0,broken=False):
@@ -33,6 +33,26 @@ class GeometryTests(unittest.TestCase):
         self.assertLess(r["cell_geometry"][0][0]["rectified_bbox"][0],r["cell_geometry"][0][1]["rectified_bbox"][0])
     def test_reread_rejects_source_mismatch(self):
         with self.assertRaises(ValueError):reread_cells(b"wrong",{"source_sha256":"a"*64},[[0,0]])
+    def test_visual_variant_is_bounded(self):
+        im=Image.new("L",(100,60),255)
+        ImageDraw.Draw(im).rectangle((20,20,40,30),fill=0)
+        out=prepare_cell(im,scale=3,tight=True)
+        self.assertEqual(out.size,(21*3+24,11*3+24))
+        self.assertEqual(im.size,(100,60))
+        with self.assertRaises(ValueError):prepare_cell(im,scale=10)
+    def test_dictionary_disabled_without_character_forcing(self):
+        from unittest.mock import patch
+        from pathlib import Path
+        import tempfile
+        with tempfile.TemporaryDirectory() as root:
+            with patch("procurement_geometry.subprocess.run") as run:
+                run.return_value.returncode=0
+                run.return_value.stdout=b"level\tconf\ttext\n5\t85\tX1\n"
+                self.assertEqual(read_cell("tesseract",Image.new("L",(80,40),255),Path(root)/"cell.png",no_dictionary=True),("X1",.85))
+                cmd=run.call_args.args[0]
+                self.assertIn("load_system_dawg=0",cmd)
+                self.assertIn("load_freq_dawg=0",cmd)
+                self.assertFalse(any("whitelist" in x for x in cmd))
     def test_permutation(self):
         rows=[["TOTAL","SKU","QTY"],["20","X","2"]]
         r=canonical_columns(rows,["SKU","QTY","TOTAL"])
