@@ -15,6 +15,8 @@ from starlette.concurrency import run_in_threadpool
 from procurement import Store,reconcile,MAX_DOC
 from procurement_history import historical_report
 from procurement_ingest import extract,propose
+from procurement_consensus import compare_image
+from procurement_references import reference_check
 import procurement_queue as queue
 import tenant
 
@@ -35,15 +37,26 @@ def make_router(actor,body,origin,base,slots):
             if suffix not in (".pdf",".png",".jpg",".jpeg",".csv",".xlsx",".json"):raise ValueError("Unsupported extension")
             with tempfile.TemporaryDirectory() as root:
                 file=Path(root)/("document"+suffix);file.write_bytes(raw)
-                r=extract(file,paddle_config=os.environ.get("BC_PROCUREMENT_PADDLE_CONFIG") or None)
-                model=os.environ.get("BC_PROCUREMENT_LOCAL_MODEL")
-                if model:r["proposal"]=propose(r,model)
+                strategy=p.get("strategy","standard")
+                if strategy=="consensus":
+                    proposal=compare_image(file)
+                    r={"status":"UNAPPROVED","proposal":proposal}
+                elif strategy=="standard":
+                    r=extract(file,paddle_config=os.environ.get("BC_PROCUREMENT_PADDLE_CONFIG") or None)
+                    model=os.environ.get("BC_PROCUREMENT_LOCAL_MODEL")
+                    if model:r["proposal"]=propose(r,model)
+                else:raise ValueError("Unknown extraction strategy")
+                candidate=r.get("proposal",{}).get("candidate")
+                if candidate is not None:
+                    with db(u) as store:
+                        r["reference_check"]=reference_check(candidate,store.documents(u["company"],True))
                 return r
         with db(u) as store:
             queue.initialize(store)
             if route=="submit":
                 raw=base64.b64decode(p["source"],validate=True)
-                return {"id":queue.submit(store,u,p["candidate"],raw,p["evidence"])}
+                checks=reference_check(p["candidate"],store.documents(u["company"],True))
+                return {"id":queue.submit(store,u,p["candidate"],raw,p["evidence"]),"reference_check":checks}
             if route=="review":
                 return queue.review(store,u,p["id"],p["decision"],p["evidence"])
             if route=="report":

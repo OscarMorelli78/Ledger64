@@ -6,6 +6,8 @@ from pathlib import Path
 from procurement import Store, canonical, reconcile
 from procurement_history import historical_report
 from procurement_ingest import extract, propose, load_source
+from procurement_consensus import compare_image
+from procurement_semantic_v2 import propose_v2
 import procurement_templates as templates
 
 
@@ -47,6 +49,7 @@ def main():
     a.add_argument("source",type=Path);a.add_argument("--paddle-config",type=Path)
     a.add_argument("--pymupdf",action="store_true");a.add_argument("--ollama-model")
     a.add_argument("--confidence",type=float,default=.90)
+    a.add_argument("--consensus",action="store_true");a.add_argument("--semantic-v2",action="store_true")
     a=sub.add_parser("template-register")
     a.add_argument("--tenant",required=True);a.add_argument("--kind",required=True)
     a.add_argument("--supplier",required=True);a.add_argument("--mapping",type=Path,required=True)
@@ -57,8 +60,13 @@ def main():
     sub.add_parser("verify")
     args=parser.parse_args()
     if args.action=="extract":
-        data=extract(args.source,paddle_config=args.paddle_config,use_pymupdf=args.pymupdf)
-        result=propose(data,args.ollama_model,args.confidence) if args.ollama_model else data
+        if args.consensus:
+            if args.ollama_model or args.paddle_config or args.pymupdf or args.semantic_v2:parser.error("--consensus is a separate image-only strategy")
+            result=compare_image(args.source)
+        else:
+            data=extract(args.source,paddle_config=args.paddle_config,use_pymupdf=args.pymupdf)
+            if args.semantic_v2 and not args.ollama_model:parser.error("--semantic-v2 requires --ollama-model")
+            result=(propose_v2 if args.semantic_v2 else propose)(data,args.ollama_model,args.confidence) if args.ollama_model else data
     else:
         with Store(args.db) as store:
             if args.action=="demo":result=demo(store)

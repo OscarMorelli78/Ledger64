@@ -113,3 +113,15 @@ recognized table count. This smoke benchmark cannot establish actual financial f
 accuracy or production capacity. Use a held-out labelled corpus and security review
 before selecting or distributing an advanced model. The local LLM now receives an
 explicit structured-output schema; its results still require independent review.
+
+## Conservative image contrast and reference checks
+
+Use `python -m procurement_cli extract synthetic.png --consensus` to compare
+three Tesseract passes (raw and bounded image enhancement). This only proposes
+known labelled layouts, never approves or silently resolves disagreements. The
+opt-in web pilot exposes the same method. Candidate references are checked
+against the tenant's reviewed order lines and original hashes; missing or
+conflicting references are reported and require investigation. This is advisory,
+not confirmation of receipt or authorization to pay. The experimental semantic
+v2 adapter is opt-in via `--semantic-v2 --ollama-model local-model`; no change
+of the default model or approval rules. New source selection clears old drafts.

@@ -12,7 +12,8 @@ async function source(){
   return {source:btoa(binary),suffix:f.name.slice(f.name.lastIndexOf('.')).toLowerCase()};
 }
 async function action(button,fn){button.disabled=true;try{await fn();$('status').textContent='OK / Correcto'}catch(e){$('status').textContent=e.message}finally{button.disabled=false}}
-$('extract').onclick=()=>action($('extract'),async()=>{const r=await request('extract',await source());$('extraction').textContent=JSON.stringify(r,null,2);if(r.proposal?.candidate)$('candidate').value=JSON.stringify(r.proposal.candidate,null,2)});
+$('source').onchange=()=>{$('candidate').value='';$('evidence').value='';$('extraction').textContent='';};
+$('extract').onclick=()=>action($('extract'),async()=>{$('candidate').value='';$('extraction').textContent='';$('source').disabled=true;try{const r=await request('extract',{...await source(),strategy:$('strategy').value});$('extraction').textContent=JSON.stringify(r,null,2);if(r.proposal?.candidate)$('candidate').value=JSON.stringify(r.proposal.candidate,null,2)}finally{$('source').disabled=false}});
 $('submit').onclick=()=>action($('submit'),async()=>{await request('submit',{...await source(),candidate:JSON.parse($('candidate').value),evidence:$('evidence').value});await refresh()});
 async function refresh(){
   const cases=await request('cases');const root=$('cases');root.replaceChildren();
