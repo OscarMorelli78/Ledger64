@@ -121,3 +121,42 @@ python scripts/doctor.py
 python scripts/check.py
 ```
 [README](../../README.ja.md) · [SECURITY](../../SECURITY.md) · [LICENSE](../../LICENSE)
+
+## 14. 購買インテリジェンス — 実験パイロット
+
+中小企業向け購買インテリジェンスエージェント。MITの決定論的コア、完全ローカル処理、人による監督付き学習を維持。Open Coreは商用戦略であり、有料拡張は未搭載。支払いは実行しません。
+
+安定版v0.1.0ではなく実験ブランチを使用し、合成データのみ扱います。第1節に従い、分析担当者と別の所有者のアカウントを作成し、Uvicorn起動前に変数を設定。ログインして /procurement を開きます。既定では無効。GitHub Pagesは静的デモで、Pythonバックエンドではありません。
+
+```bash
+git clone -b feat/adaptive-procurement-v1 https://github.com/OscarMorelli78/Ledger64.git Ledger64-pilot
+# Linux/macOS, before starting Uvicorn:
+export BC_PROCUREMENT_PILOT=1
+```
+```powershell
+$env:BC_PROCUREMENT_PILOT = "1"
+```
+
+http://127.0.0.1:8765/procurement
+
+対応PDF、XLSX、CSV、JSON、PNG、JPG（最大2 MB）を入力。標準抽出はデジタルテキストとローカルOCRに対応。罫線付き画像には軽量グリッド、既知のラベル形式には複数読取比較を使用。小さな傾き（±5°）を補正しますが、罫線なしや任意文書は保証外。PaddleOCR/PP-Structureは任意の高負荷機能。試験済みQwenモデルは自動抽出の受入基準未達。OCRは英語・スペイン語。
+
+各セルを確認し、種類・ID・供給元・日付・EURのメタデータを入力。正確な列見出しを標準フィールドに割り当て、不明値を推測しない。曖昧な識別子は代替読取を要求し原本と照合。証拠付き草案を提出し別の所有者が審査。参照一致は支払い許可ではありません。信頼済みCLIで供給元のCSV・表テンプレートを再利用する際は構造のみ、金額は再利用しません。
+
+発注書・受領書・請求書を承認。部分納品と複数請求を発注明細単位で累積照合し、数量・EUR・価格割合の許容差を設定。契約割引率と履歴異常は決定論的に計算。潜在的な超過額や節約額は支払済損失の証明ではありません。訂正は原本を保持して版を追加、取消は現行報告・学習から除外。独立審査が必要です。
+
+### ローカルバックアップと復元
+
+稼働DB切替前にサービスを停止。既存の非公開ディレクトリを使用しSHA-256を別途保管、新規ファイルのみに復元します。購買DBは原本、版、審査キュー、テンプレートを含み履歴信号を再構築。認証DBと企業コアDBは個別バックアップが必要。暗号化・自動スケジュールは未対応。企業データをGitHubへ送らないでください。
+
+```bash
+python -m procurement_backup create --source /private/procurement.sqlite3 --destination /backup/snapshot.sqlite3 --tenant COMPANY_ID
+python -m procurement_backup verify --source /backup/snapshot.sqlite3 --tenant COMPANY_ID --sha256 EXPECTED_HASH
+python -m procurement_backup restore --source /backup/snapshot.sqlite3 --destination /recovery/recovered.sqlite3 --tenant COMPANY_ID --sha256 EXPECTED_HASH
+```
+
+### 証拠と制約
+
+合成データ受入：108テスト、5画像の初回4/5、模擬審査後5/5、復元後も150 EURの潜在超過額を再現。軽量OCRは4表52/52セル、平均2.15秒、サンプル計測ピーク94.8 MiB。Paddleは2表24/24セル、資源目標未達。本番認証ではありません。現代風テーマ、多様な形式、暗号化、全体復元、実文書検証は未完了。
+
+[CI — f9fd4a66](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CLI](../procurement-pilot.md) · [Backup](../procurement-data-resilience.md)

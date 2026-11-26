@@ -121,3 +121,42 @@ python scripts/doctor.py
 python scripts/check.py
 ```
 [README](../../README.en.md) · [SECURITY](../../SECURITY.md) · [LICENSE](../../LICENSE)
+
+## 14. Procurement Intelligence — experimental pilot
+
+Procurement intelligence agent for SMEs: retain the MIT deterministic core, exclusively local processing and human-supervised learning. Open Core is the commercial strategy; no paid extensions are included. No payment execution.
+
+Use the experimental branch, not the stable v0.1.0 release. Synthetic data only. Install as in section 1, create distinct analyst and owner accounts, set the flag before launching Uvicorn, sign in and open /procurement. The default is disabled. GitHub Pages is a static demo, not this Python backend.
+
+```bash
+git clone -b feat/adaptive-procurement-v1 https://github.com/OscarMorelli78/Ledger64.git Ledger64-pilot
+# Linux/macOS, before starting Uvicorn:
+export BC_PROCUREMENT_PILOT=1
+```
+```powershell
+$env:BC_PROCUREMENT_PILOT = "1"
+```
+
+http://127.0.0.1:8765/procurement
+
+Upload compatible PDF, XLSX, CSV, JSON, PNG or JPG (2 MB maximum). Standard extraction supports digital text and local OCR; use the lightweight grid option for supported ruled images, or compare readings for known labelled layouts. Small rotations (±5°) can be corrected; borderless tables and arbitrary documents are not guaranteed. PaddleOCR/PP-Structure is optional and resource intensive. The tested Qwen models failed acceptance and are not approved for automatic extraction. OCR models remain English/Spanish.
+
+Review each cell and enter metadata (kind, ID, supplier, date and EUR). Map exact headers to canonical fields; do not infer missing values. Request alternate readings for unclear identifiers. Compare against the original. Submit the draft with evidence; a distinct owner reviews it. Compatible references are not authorization to pay. Supplier CSV/table templates are reusable through the trusted CLI, only layout is reused, never amounts.
+
+For matching, approve order, receipt and invoice documents. Partial deliveries and multiple invoices are reconciled cumulatively by order line; configure quantity, EUR and price-percent tolerances. Contract percentage discounts and historical price anomalies are calculated deterministically. Exposure and estimated savings are not confirmed paid losses. Correction keeps the original and appends a version; revocation excludes the record from current reports and learning. Independent approval is required.
+
+### Local backup and recovery
+
+Stop before live cutover. Use a private existing backup and recovery directory, retain the returned SHA-256 separately and restore only to a new file. The procurement database includes original documents, revisions, review queues and templates; historical signals are reconstructed. Authentication and the core company database require separate backups. No encryption or automatic scheduling yet. Never upload business data to GitHub.
+
+```bash
+python -m procurement_backup create --source /private/procurement.sqlite3 --destination /backup/snapshot.sqlite3 --tenant COMPANY_ID
+python -m procurement_backup verify --source /backup/snapshot.sqlite3 --tenant COMPANY_ID --sha256 EXPECTED_HASH
+python -m procurement_backup restore --source /backup/snapshot.sqlite3 --destination /recovery/recovered.sqlite3 --tenant COMPANY_ID --sha256 EXPECTED_HASH
+```
+
+### Evidence and limits
+
+Synthetic acceptance: 108 tests, five-image reconciliation with 4/5 first-pass and 5/5 after simulated review, EUR 150 documented exposure, recovery drill reproduced the report. Lightweight OCR: 52/52 cells in four ruled tables, mean 2.15 s, sampled peak 94.8 MiB. Paddle: 24/24 cells in two tables, resource targets unmet. Not production certification. The modern theme, broader layouts, encryption, full-install recovery and real-document validation are pending.
+
+[CI — f9fd4a66](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CLI](../procurement-pilot.md) · [Backup](../procurement-data-resilience.md)

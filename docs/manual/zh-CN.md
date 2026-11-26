@@ -121,3 +121,42 @@ python scripts/doctor.py
 python scripts/check.py
 ```
 [README](../../README.zh-CN.md) · [SECURITY](../../SECURITY.md) · [LICENSE](../../LICENSE)
+
+## 14. 采购智能 — 实验性试点
+
+面向中小企业的采购智能代理：保留 MIT 确定性核心，仅本地处理，人工监督学习。Open Core 为商业策略，尚不包含付费扩展。不执行付款。
+
+使用实验分支而非稳定版 v0.1.0。仅使用合成数据。按第 1 节安装，创建不同的分析员和所有者账号，启动 Uvicorn 前设置变量，登录后打开 /procurement。默认关闭。GitHub Pages 是静态演示，不是 Python 后端。
+
+```bash
+git clone -b feat/adaptive-procurement-v1 https://github.com/OscarMorelli78/Ledger64.git Ledger64-pilot
+# Linux/macOS, before starting Uvicorn:
+export BC_PROCUREMENT_PILOT=1
+```
+```powershell
+$env:BC_PROCUREMENT_PILOT = "1"
+```
+
+http://127.0.0.1:8765/procurement
+
+上传兼容的 PDF、XLSX、CSV、JSON、PNG 或 JPG（最大 2 MB）。标准提取支持数字文本和本地 OCR；有边框的适用图像可使用轻量网格模式，已知标签布局可比较多次识别。支持小角度纠偏（±5°），不保证无边框或任意文档。PaddleOCR/PP-Structure 为可选高资源组件。已测试 Qwen 模型未通过自动提取验收。OCR 语言为英语和西班牙语。
+
+逐格核对并输入元数据（类型、ID、供应商、日期、EUR）。将准确表头映射到规范字段，不推测缺失值。对模糊标识符请求备选识别结果，对照原件。提交附证据的草稿，由另一所有者审核。引用匹配不等于付款授权。可信 CLI 可复用供应商 CSV/表格模板，仅复用结构，不复用金额。
+
+批准订单、收货单和发票。按订单行累计核对部分交付和多张发票；可设置数量、EUR 金额及价格百分比容差。确定性计算合同百分比折扣和历史异常。潜在风险及预计节省不代表已支付的确认损失。更正保留原件并追加版本；撤销使记录退出当前报告及学习。必须独立审核。
+
+### 本地备份与恢复
+
+切换活动数据库前停止服务。使用现有私有目录，单独保存 SHA-256，只恢复至新文件。采购库包含原件、版本、审核队列和模板，重建历史信号。认证及企业核心库另行备份。尚无加密和自动调度。切勿将企业数据上传 GitHub。
+
+```bash
+python -m procurement_backup create --source /private/procurement.sqlite3 --destination /backup/snapshot.sqlite3 --tenant COMPANY_ID
+python -m procurement_backup verify --source /backup/snapshot.sqlite3 --tenant COMPANY_ID --sha256 EXPECTED_HASH
+python -m procurement_backup restore --source /backup/snapshot.sqlite3 --destination /recovery/recovered.sqlite3 --tenant COMPANY_ID --sha256 EXPECTED_HASH
+```
+
+### 证据和限制
+
+合成验收：108 项测试，五张图像首轮 4/5 正确、模拟审核后 5/5 正确，恢复后重现 150 EUR 文档风险金额。轻量 OCR：四张表格 52/52 单元格正确，平均 2.15 秒，采样峰值 94.8 MiB。Paddle：两张表格 24/24 单元格正确，资源目标未达成。并非生产认证。现代主题、更多布局、加密、完整恢复及真实文档验证待完成。
+
+[CI — f9fd4a66](https://github.com/OscarMorelli78/Ledger64/actions/runs/45889543410) · [PR #2](https://github.com/OscarMorelli78/Ledger64/pull/2) · [CLI](../procurement-pilot.md) · [Backup](../procurement-data-resilience.md)
