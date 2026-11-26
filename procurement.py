@@ -147,28 +147,103 @@ class Store:
             raise ValueError("Explicit data classification required")
         return tenant, int(synthetic)
 
-    def verify(self):
-        prev = "0" * 64
-        expected = set()
-        for body, predecessor, h in self.db.execute("SELECT body,prev,hash FROM procurement_events ORDER BY seq"):
-            if prev != predecessor or digest((prev + body).encode()) != h:
-                return False
-            try:
-                entry = json.loads(body)
-                item = tuple(entry)
-                if item in expected:
-                    return False
-                expected.add(item)
-            except (TypeError, ValueError):
-                return False
-            prev = h
-        actual = set()
+    def _replay(self):
+        """Replay old approval events and append-only correction/revocation events."""
+        rows={}
         for row in self.db.execute("SELECT tenant,synthetic,kind,supplier_key,doc_key,body,source_hash,body_hash,original,proposer,reviewer,evidence FROM procurement_docs"):
-            tenant, synthetic, kind, supplier, key, body, source, h, original, proposer, reviewer, evidence = row
-            if digest(body.encode()) != h or digest(original) != source:
-                return False
-            actual.add((tenant, synthetic, kind, supplier, key, source, h, proposer, reviewer, evidence))
-        return actual == expected
+            tenant,synthetic,kind,supplier,key,body,source,h,original,proposer,reviewer,evidence=row
+            if digest(body.encode())!=h or digest(original)!=source:
+                raise ValueError("Original integrity failure")
+            doc=validate(json.loads(body))
+            identity=(tenant,synthetic,kind,supplier,key)
+            if (doc["kind"],doc["supplier"].casefold(),doc["id"].casefold())!=identity[2:]:
+                raise ValueError("Original identity mismatch")
+            rows[identity]=(doc,source,h,proposer,reviewer,evidence)
+        active={};history={};prev="0"*64
+        for body,predecessor,h in self.db.execute("SELECT body,prev,hash FROM procurement_events ORDER BY seq"):
+            if prev!=predecessor or digest((prev+body).encode())!=h:raise ValueError("Event chain failure")
+            entry=json.loads(body)
+            if isinstance(entry,list):
+                if len(entry)!=10:raise ValueError("Invalid legacy event")
+                key=tuple(entry[:5])
+                if key not in rows or key in history:raise ValueError("Invalid approval")
+                doc,source,version,proposer,reviewer,evidence=rows[key]
+                if entry[5:]!=[source,version,proposer,reviewer,evidence]:raise ValueError("Approval mismatch")
+                state=dict(document=doc,source_sha256=source,version=version,status="ACTIVE")
+                active[key]=state
+                history[key]=[dict(state,action="APPROVE",proposer=proposer,reviewer=reviewer,evidence=evidence,event_sha256=h)]
+            else:
+                exact_keys(entry,("action","key","previous_version","document","source_sha256","proposer","reviewer","evidence","request_id"))
+                if not isinstance(entry["key"],list) or len(entry["key"])!=5:raise ValueError("Invalid event identity")
+                key=tuple(entry["key"])
+                if key not in active:raise ValueError("Document unavailable")
+                old=active[key]
+                if entry["previous_version"]!=old["version"] or entry["source_sha256"]!=old["source_sha256"]:raise ValueError("Stale revision")
+                self._validate_revision(entry["action"],key,old,entry["document"],entry["proposer"],entry["reviewer"],entry["evidence"],entry["request_id"])
+                state=dict(document=entry["document"] if entry["action"]=="CORRECT" else old["document"],
+                           source_sha256=old["source_sha256"],version=h,status="ACTIVE" if entry["action"]=="CORRECT" else "REVOKED")
+                history[key].append(dict(state,action=entry["action"],proposer=entry["proposer"],reviewer=entry["reviewer"],evidence=entry["evidence"],event_sha256=h,request_id=entry["request_id"]))
+                if state["status"]=="ACTIVE":active[key]=state
+                else:del active[key]
+            prev=h
+        if set(history)!=set(rows):raise ValueError("Missing approval event")
+        return active,history
+
+    def verify(self):
+        try:self._replay();return True
+        except (ValueError,TypeError,KeyError,AttributeError,sqlite3.Error):return False
+
+    @staticmethod
+    def _validate_revision(action,key,old,document,proposer,reviewer,evidence,request_id):
+        identifier(proposer);identifier(reviewer)
+        if proposer.casefold()==reviewer.casefold():raise ValueError("Independent reviewer required")
+        if not isinstance(evidence,str) or not 10<=len(evidence.strip())<=1000:raise ValueError("Evidence required")
+        if request_id is not None and (not isinstance(request_id,str) or not re.fullmatch(r"[a-f0-9]{64}",request_id)):
+            raise ValueError("Invalid review request")
+        if action=="CORRECT":
+            validate(document)
+            if (document["kind"],document["supplier"].casefold(),document["id"].casefold())!=key[2:]:
+                raise ValueError("Correction cannot change document identity")
+            if document==old["document"]:raise ValueError("No change")
+            if len(canonical(document).encode())>MAX_DOC:raise ValueError("Correction too large")
+        elif action=="REVOKE":
+            if document is not None:raise ValueError("Revocation has no replacement")
+        else:raise ValueError("Invalid revision action")
+
+    def _revise_in_tx(self,tenant,synthetic,kind,supplier,doc_id,expected_version,action,document,proposer,reviewer,evidence,request_id=None):
+        key=(*self.scope(tenant,synthetic),kind,identifier(supplier).casefold(),identifier(doc_id).casefold())
+        active,_=self._replay()
+        old=active.get(key)
+        if old is None or old["version"]!=expected_version:raise ValueError("Document unavailable or stale revision")
+        self._validate_revision(action,key,old,document,proposer,reviewer,evidence,request_id)
+        entry=canonical(dict(action=action,key=list(key),previous_version=expected_version,document=document,
+                   source_sha256=old["source_sha256"],proposer=proposer,reviewer=reviewer,evidence=evidence,request_id=request_id))
+        prev=self.db.execute("SELECT hash FROM procurement_events ORDER BY seq DESC LIMIT 1").fetchone()[0]
+        version=digest((prev+entry).encode())
+        self.db.execute("INSERT INTO procurement_events(body,prev,hash) VALUES(?,?,?)",(entry,prev,version))
+        self._replay()
+        return version
+
+    def revise(self,tenant,synthetic,kind,supplier,doc_id,expected_version,action,document,proposer,reviewer,evidence):
+        try:
+            self.db.execute("BEGIN IMMEDIATE")
+            version=self._revise_in_tx(tenant,synthetic,kind,supplier,doc_id,expected_version,action,document,proposer,reviewer,evidence)
+            self.db.commit()
+            return version
+        except BaseException:
+            self.db.rollback();raise
+
+    def revisions(self,tenant,synthetic):
+        scope=self.scope(tenant,synthetic)
+        self.db.execute("BEGIN")
+        try:
+            _,history=self._replay()
+            result=[{"kind":key[2],"supplier_key":key[3],"document_key":key[4],"versions":versions}
+                    for key,versions in sorted(history.items()) if key[:2]==scope]
+            self.db.commit()
+            return result
+        except BaseException:
+            self.db.rollback();raise
 
     def _approve_in_tx(self, tenant, synthetic, document, original, proposer, reviewer, evidence):
         scope = self.scope(tenant, synthetic)
@@ -214,10 +289,8 @@ class Store:
         scope = self.scope(tenant, synthetic)
         self.db.execute("BEGIN")
         try:
-            if not self.verify():
-                raise ValueError("Ledger integrity failure")
-            result = [(json.loads(body), src) for body, src in self.db.execute(
-                "SELECT body,source_hash FROM procurement_docs WHERE tenant=? AND synthetic=?", scope)]
+            active,_=self._replay()
+            result=[(state["document"],state["source_sha256"]) for key,state in sorted(active.items()) if key[:2]==scope]
             self.db.commit()
             return result
         except BaseException:

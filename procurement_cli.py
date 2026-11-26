@@ -70,6 +70,13 @@ def main():
     a=sub.add_parser("table-template-apply")
     a.add_argument("--tenant",required=True);a.add_argument("--id",required=True);a.add_argument("--extraction",type=Path,required=True)
     a.add_argument("--index",type=int,required=True);a.add_argument("--metadata",type=Path,required=True)
+    a=sub.add_parser("revisions");a.add_argument("--tenant",required=True)
+    a=sub.add_parser("revise")
+    a.add_argument("--tenant",required=True);a.add_argument("--kind",required=True)
+    a.add_argument("--supplier",required=True);a.add_argument("--id",required=True)
+    a.add_argument("--version",required=True);a.add_argument("--decision",choices=("CORRECT","REVOKE"),required=True)
+    a.add_argument("--document",type=Path);a.add_argument("--proposer",required=True)
+    a.add_argument("--reviewer",required=True);a.add_argument("--evidence",required=True)
     sub.add_parser("verify")
     args=parser.parse_args()
     if args.action in ("table-propose","table-template-register","table-template-apply"):
@@ -115,6 +122,13 @@ def main():
             elif args.action=="template-apply":
                 raw,_=load_source(args.source)
                 result=templates.apply(store,args.tenant,True,args.id,raw)
+            elif args.action=="revisions":result=store.revisions(args.tenant,True)
+            elif args.action=="revise":
+                candidate=None
+                if args.document:
+                    if args.document.stat().st_size>2_000_000:raise ValueError("Candidate too large")
+                    candidate=json.loads(args.document.read_text(encoding="utf-8"))
+                result={"version":store.revise(args.tenant,True,args.kind,args.supplier,args.id,args.version,args.decision,candidate,args.proposer,args.reviewer,args.evidence)}
             elif args.action=="match":result=reconcile(store.documents(args.tenant,True),args.as_of,{"quantity":args.quantity,"amount":args.amount,"price_pct":args.price_pct})
             elif args.action=="history":result=historical_report(store,args.tenant,True,args.as_of,args.rise_pct)
             else:

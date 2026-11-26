@@ -154,3 +154,18 @@ mandatory. The trusted CLI `table-template-register` requires a matching previou
 approved document and source hash, distinct reviewer identities and evidence;
 `table-template-apply` reuses only column structure and rejects changed header sets
 or supplier/kind mismatches. It never reuses historical prices or quantities.
+
+## Approved document lifecycle (synthetic trusted CLI)
+
+`revisions --tenant demo` lists immutable original and subsequent versions.
+`revise --tenant demo --kind invoice --supplier 'Fictitious supplier' --id I2
+--version VERSION --decision CORRECT --document corrected.json --proposer analyst
+--reviewer owner --evidence 'Verified transcription against original'` appends a
+correction for the same original, identity and source hash. REVOKE omits the
+replacement document and permanently excludes the document from current matching,
+history and model baselines. This does not implement credit notes or bank refunds.
+Original bytes and original approved body are unchanged. Expected-version checks
+prevent concurrent stale corrections. Reports recompute current corrected truth;
+`as_of` is an economic document date, not a historical knowledge-time snapshot.
+The chain detects ordinary tampering, not a privileged attacker rewriting the
+whole database and chain. Trusted CLI identities are not authenticated.
