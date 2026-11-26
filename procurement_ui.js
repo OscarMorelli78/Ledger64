@@ -49,7 +49,21 @@ function renderTables(result){
         const td=document.createElement(i===0?'th':'td'),input=document.createElement('input');
         input.value=value;input.setAttribute('aria-label','Row '+(i+1)+' column '+(j+1));input.maxLength=2000;
         input.oninput=()=>invalidate();
-        td.append(input);tr.append(td);cells.push(input);
+        td.append(input);
+        if(draft.cell_geometry){
+          const rb=document.createElement('button');rb.type='button';rb.textContent='OCR alternatives';
+          rb.setAttribute('aria-label','OCR alternatives for row '+(i+1)+' column '+(j+1));
+          const output=document.createElement('pre');
+          rb.onclick=()=>action(rb,async()=>{
+            $('source').disabled=true;
+            try{
+              const response=await request('reread-cells',{...await source(),table:{source_sha256:draft.source_sha256,transform:draft.transform,rectified_size:draft.rectified_size},positions:[[i,j]]});
+              output.textContent=JSON.stringify(response.alternatives[0].readings,null,2);
+            }finally{$('source').disabled=false}
+          });
+          td.append(rb,output);
+        }
+        tr.append(td);cells.push(input);
       }
       inputs.push(cells);table.append(tr);
     }

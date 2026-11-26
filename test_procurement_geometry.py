@@ -1,7 +1,7 @@
 import io
 import unittest
 from PIL import Image,ImageDraw
-from procurement_geometry import deskew,grid_geometry,extract_grid
+from procurement_geometry import deskew,grid_geometry,extract_grid,reread_cells
 from procurement_table import canonical_columns
 
 def image(angle=0,broken=False):
@@ -31,6 +31,8 @@ class GeometryTests(unittest.TestCase):
         self.assertEqual(r["cells"],[["0","1","2"],["3","4","5"],["6","7","8"]])
         self.assertEqual(r["status"],"REVIEW_REQUIRED")
         self.assertLess(r["cell_geometry"][0][0]["rectified_bbox"][0],r["cell_geometry"][0][1]["rectified_bbox"][0])
+    def test_reread_rejects_source_mismatch(self):
+        with self.assertRaises(ValueError):reread_cells(b"wrong",{"source_sha256":"a"*64},[[0,0]])
     def test_permutation(self):
         rows=[["TOTAL","SKU","QTY"],["20","X","2"]]
         r=canonical_columns(rows,["SKU","QTY","TOTAL"])

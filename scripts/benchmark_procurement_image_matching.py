@@ -3,13 +3,14 @@
 Metadata and mapping are explicitly supplied by a hypothetical operator.
 No model guesses missing values. Tests use synthetic approvals only.
 """
-import json,sys,tempfile,time
+import argparse,json,sys,tempfile,time
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from procurement import Store,reconcile
-from procurement_geometry import extract_grid
+from procurement_geometry import extract_grid,reread_cells
 from procurement_table import propose_from_cells
+from procurement_references import reference_check
 
 def docs():
     supplier="SYNTHETIC"
@@ -52,6 +53,7 @@ def render(path,doc,index):
     return {k:labels[k] for k in keys}
 
 def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--strict',action='store_true');args=parser.parse_args()
     report=[]
     with tempfile.TemporaryDirectory() as root:
         with Store(Path(root)/"synthetic.sqlite3") as store:
@@ -67,8 +69,32 @@ def main():
                 except (ValueError,TypeError,KeyError) as exc:
                     report.append({"id":gold["id"],"error":str(exc),"observed":table.get("cells")})
                     print(json.dumps(report,indent=2));raise
-                report.append({"id":gold["id"],"exact":exact,"seconds":round(time.perf_counter()-start,3),"observed":draft["candidate"]})
-                # Simulated review oracle: only approve a fully exact fixture.
+                item={"id":gold["id"],"first_pass_exact":exact,"seconds":round(time.perf_counter()-start,3),"observed":draft["candidate"]}
+                if not exact and not args.strict and gold["kind"] in ("invoice","receipt"):
+                    # Simulate a reviewer selecting a literal alternate reading only
+                    # when it resolves a missing reference against approved records.
+                    # Never use fixture truth to choose an alternate.
+                    approved=store.documents("demo",True)
+                    checks=reference_check(draft["candidate"],approved)
+                    col=table["cells"][0].index(mapping["order_id"])
+                    for i,check in enumerate(checks["lines"]):
+                        if check["status"]!="ORDER_NOT_FOUND":continue
+                        alternatives=reread_cells(raw,table,[[i+1,col]])["alternatives"][0]["readings"]
+                        candidates=set()
+                        for alt in alternatives:
+                            candidate=dict(draft["candidate"],lines=[dict(x) for x in draft["candidate"]["lines"]])
+                            candidate["lines"][i]["order_id"]=alt["text"]
+                            try:
+                                if reference_check(candidate,approved)["lines"][i]["status"]=="REFERENCE_COMPATIBLE":
+                                    candidates.add(alt["text"])
+                            except ValueError:pass
+                        item.setdefault("reference_alternatives",[]).append({"row":i+2,"readings":alternatives,"compatible":sorted(candidates)})
+                        if len(candidates)==1:
+                            # Explicit simulated human selection, not runtime auto-correction.
+                            table["cells"][i+1][col]=next(iter(candidates))
+                            draft=propose_from_cells(table,metadata,mapping,table["source_sha256"])
+                    exact=draft["candidate"]==gold
+                item["reviewed_exact"]=exact;report.append(item)
                 if not exact:
                     print(json.dumps(report,indent=2));raise SystemExit("Synthetic candidate mismatch")
                 store.approve("demo",True,draft["candidate"],raw,"analyst","reviewer","Synthetic fixture independently compared to known truth")
@@ -77,5 +103,5 @@ def main():
             assert result["potential_exposure_eur"]=="150.00",result
             assert result["confirmed_loss_eur"] is None
             assert len(result["lines"])==2
-            print(json.dumps({"scope":"five synthetic grid images; operator-provided metadata and mapping; simulated independent review","cases":report,"exposure_eur":result["potential_exposure_eur"],"confirmed_loss_eur":None,"integrity_verified":True},indent=2))
+            print(json.dumps({"scope":"five synthetic grid images; operator-provided metadata/mapping; simulated independent review of literal reference alternatives","first_pass_exact_count":sum(x["first_pass_exact"] for x in report),"reviewed_exact_count":sum(x["reviewed_exact"] for x in report),"cases":report,"exposure_eur":result["potential_exposure_eur"],"confirmed_loss_eur":None,"integrity_verified":True},indent=2))
 if __name__=="__main__":main()

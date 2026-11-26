@@ -89,3 +89,12 @@ Only exact fixture candidates are approved by a simulated independent reviewer.
 The original images and normalized records are retained, and the financial engine
 must reproduce EUR 150 documented exposure, no confirmed paid loss, and valid
 integrity. This is not a test of automatic header metadata extraction.
+
+The first image-to-matching run 45883988307 failed when PO1 was read as Pol.
+The failure is retained. The next test reports first-pass exactness separately
+from simulated assisted exactness: for a missing order reference, the reviewer
+may select a literal alternate OCR reading only if it is uniquely compatible
+with the already approved order, product, unit and date. The fixture truth is
+used only to score the result, not choose the alternate. `--strict` disallows
+assistance. Runtime exposes alternatives as read-only suggestions; it never
+automatically replaces the value or approves the document.

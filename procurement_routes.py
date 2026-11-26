@@ -18,7 +18,7 @@ from procurement_ingest import extract,propose
 from procurement_consensus import compare_image
 from procurement_references import reference_check
 from procurement_table import table_drafts,propose_from_cells
-from procurement_geometry import extract_grid
+from procurement_geometry import extract_grid,reread_cells
 import procurement_queue as queue
 import tenant
 
@@ -57,6 +57,9 @@ def make_router(actor,body,origin,base,slots):
                     with db(u) as store:
                         r["reference_check"]=reference_check(candidate,store.documents(u["company"],True))
                 return r
+        if route=="reread-cells":
+            raw=base64.b64decode(p["source"],validate=True)
+            return reread_cells(raw,p["table"],p["positions"])
         if route=="table-propose":
             raw=base64.b64decode(p["source"],validate=True)
             if not 1<=len(raw)<=MAX_DOC or digest(raw)!=p["source_sha256"]:raise ValueError("Source mismatch")
@@ -112,7 +115,7 @@ def make_router(actor,body,origin,base,slots):
         u=await run_in_threadpool(actor,req)
         if not u:return error(401,"Sign in")
         if req.headers.get("origin")!=origin or not hmac.compare_digest(req.headers.get("X-CSRF-Token",""),u["csrf"]):return error(403,"Unauthorized")
-        if route not in ("extract","table-propose","submit","review","report"):return error(404,"Unknown route")
+        if route not in ("extract","reread-cells","table-propose","submit","review","report"):return error(404,"Unknown route")
         if route!="report" and u["role"]=="reader":return error(403,"Write permission required")
         if route=="review" and u["role"]!="owner":return error(403,"Owner permission required")
         if not slots.acquire(blocking=False):return error(503,"Busy")

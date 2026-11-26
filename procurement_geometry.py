@@ -82,10 +82,12 @@ def grid_geometry(image):
             if sum(v>=100 for v in projections(crop,"col"))<.8*crop.width:raise ValueError("Missing horizontal ruling")
     return xs,ys
 
-def read_cell(binary,image,path):
+def read_cell(binary,image,path,*,language="spa+eng",psm=7,upscale=False):
+    if upscale and image.width*image.height*4<=MAX_PIXELS:
+        image=image.resize((image.width*2,image.height*2),Image.Resampling.LANCZOS)
     image=ImageOps.expand(image,border=12,fill=255)
     image.save(path)
-    proc=subprocess.run([binary,str(path),"stdout","-l","spa+eng","--psm","7","tsv"],
+    proc=subprocess.run([binary,str(path),"stdout","-l",language,"--psm",str(psm),"tsv"],
                         capture_output=True,timeout=10,check=False)
     if proc.returncode or len(proc.stdout)>100_000:raise ValueError("Cell OCR failed")
     words=[];scores=[]
@@ -122,3 +124,41 @@ def extract_grid(raw,reader=None):
     return {"source_sha256":digest(raw),"status":"REVIEW_REQUIRED","page":1,"cells":rows,
             "cell_geometry":positions,"transform":transform,"rectified_size":[image.width,image.height],
             "warning":"Coordinates are on the rectified image. Compare with original. No automatic approval."}
+
+
+def reread_cells(raw,table,positions):
+    """Offer alternative OCR evidence, never rewrite a cell or force a known ID.
+
+    Coordinates and original hash must match a fresh rectification. Limit this
+    optional review action to 8 cells, with no whitelist of expected characters.
+    """
+    from procurement import digest
+    if not isinstance(raw,bytes) or not 1<=len(raw)<=2_000_000 or digest(raw)!=table.get("source_sha256"):
+        raise ValueError("Original source mismatch")
+    if not isinstance(positions,list) or not 1<=len(positions)<=8:
+        raise ValueError("Select 1–8 cells")
+    binary=shutil.which("tesseract")
+    if not binary:raise ValueError("Local OCR required")
+    with Image.open(io.BytesIO(raw)) as im:
+        if im.format not in ("PNG","JPEG") or im.width*im.height>MAX_PIXELS:raise ValueError("Unsupported image")
+        image,transform=deskew(im)
+    xs,ys=grid_geometry(image)
+    if transform!=table.get("transform") or [image.width,image.height]!=table.get("rectified_size"):
+        raise ValueError("Rectification mismatch")
+    results=[]
+    with tempfile.TemporaryDirectory() as root:
+        path=Path(root)/"cell.png"
+        for pos in positions:
+            if not isinstance(pos,list) or len(pos)!=2 or any(type(v) is not int for v in pos):
+                raise ValueError("Invalid cell position")
+            r,c=pos
+            if not 0<=r<len(ys)-1 or not 0<=c<len(xs)-1:raise ValueError("Cell outside grid")
+            box=(xs[c]+6,ys[r]+6,xs[c+1]-6,ys[r+1]-6)
+            crop=image.crop(box)
+            readings=[]
+            for lang,psm,up in (("eng",7,True),("eng",8,True),("spa+eng",13,True)):
+                value,confidence=read_cell(binary,crop,path,language=lang,psm=psm,upscale=up)
+                readings.append({"text":value,"confidence":confidence,"language":lang,"psm":psm,"upscale":up})
+            results.append({"row":r+1,"column":c+1,"rectified_bbox":list(box),"readings":readings})
+    return {"status":"REVIEW_REQUIRED","source_sha256":digest(raw),"alternatives":results,
+            "warning":"Alternatives are not corrected or approved values; compare original."}
