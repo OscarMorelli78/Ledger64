@@ -1,0 +1,45 @@
+name: Ledger64 promotional video
+on:
+  push:
+    branches: [promo/ledger64-video]
+    paths: ['scripts/record_promo.py', '.github/workflows/promo-video.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Install runtime and browser tools
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list /etc/apt/sources.list.d/microsoft-prod.sources
+          sudo apt-get update -o Acquire::Retries=3
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng tesseract-ocr-spa libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-noto-core fonts-noto-cjk ffmpeg
+          python -m pip install -r requirements.txt playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Capture actual synthetic audit in Chromium
+        run: python scripts/record_promo.py
+      - name: Encode and validate 15-second MP4
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel error -y -i promo-output/raw.webm -vf "fps=30,tpad=stop_mode=clone:stop_duration=15,drawbox=x=0:y=0:w=iw:h=38:color=0x17134f@0.94:t=fill,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='LEDGER64  |  REAL APP DEMO - SYNTHETIC DATA':fontcolor=white:fontsize=19:x=24:y=8" -t 15 -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -movflags +faststart -an promo-output/Ledger64-demo-15s.mp4
+          ffprobe -v error -show_entries format=duration,size:stream=codec_name,width,height -of json promo-output/Ledger64-demo-15s.mp4 | tee promo-output/video-info.json
+          python -c "import json; d=json.load(open('promo-output/video-info.json')); assert abs(float(d['format']['duration'])-15)<0.1; assert d['streams'][0]['codec_name']=='h264'"
+          sha256sum promo-output/Ledger64-demo-15s.mp4 > promo-output/video.sha256
+      - uses: actions/upload-artifact@v6
+        with:
+          name: Ledger64-demo-15s
+          path: |
+            promo-output/Ledger64-demo-15s.mp4
+            promo-output/video-info.json
+            promo-output/video.sha256
+            promo-output/*.png
+          retention-days: 30
+          if-no-files-found: error
